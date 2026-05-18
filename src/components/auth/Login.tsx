@@ -12,10 +12,8 @@ export const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [showAdminKey, setShowAdminKey] = useState(false);
   const [name, setName] = useState('');
   const [role, setRole] = useState<UserRole>('enumeration');
-  const [adminKey, setAdminKey] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,38 +24,12 @@ export const Login: React.FC = () => {
 
     try {
       if (isAdminPortal) {
-        // Admin Access Key Check
-        const masterKey = import.meta.env.VITE_ADMIN_ACCESS_KEY || 'pelykan2024';
-        if (adminKey !== masterKey) {
-          setError("Invalid Admin Access Key.");
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+        } catch (err: any) {
+          setError("Invalid admin credentials or account does not exist.");
           setLoading(false);
           return;
-        }
-
-        // Programmatically login as admin using the key as password
-        const adminEmail = 'admin@mealvilla.com';
-        let userCredential;
-        
-        try {
-          userCredential = await signInWithEmailAndPassword(auth, adminEmail, adminKey);
-        } catch (err: any) {
-          if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
-            try {
-              userCredential = await createUserWithEmailAndPassword(auth, adminEmail, adminKey);
-            } catch (createErr) {
-              setError("Admin authentication failed. Please verify the master key.");
-              setLoading(false);
-              return;
-            }
-          } else {
-            throw err;
-          }
-        }
-
-        if (userCredential) {
-          // No Firestore document created for admin. 
-          // AuthContext handles the 'admin' role in-memory for this email.
-          setLoading(false);
         }
       } else {
         if (isLogin) {
@@ -113,28 +85,39 @@ export const Login: React.FC = () => {
           
           {isAdminPortal ? (
             <div className="space-y-6 animate-in slide-in-from-top-2 duration-300">
-              <div className="p-6 bg-stone-50 rounded-[2rem] border border-stone-100 shadow-inner">
-                <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+              <div className="p-6 bg-stone-50 rounded-[2rem] border border-stone-100 shadow-inner space-y-4">
+                <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-2 flex items-center gap-2">
                   <ShieldCheck size={14} className="text-amber-600" />
                   System Authorization
                 </p>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest ml-1">Admin Access Key</label>
+                  <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest ml-1">Admin Email</label>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full bg-white border border-stone-200 rounded-2xl px-5 py-4 text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all font-bold tracking-widest"
+                    placeholder="admin@mealvilla.com"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest ml-1">Admin Password</label>
                   <div className="relative">
                     <input
-                      type={showAdminKey ? "text" : "password"}
+                      type={showPassword ? "text" : "password"}
                       required
-                      value={adminKey}
-                      onChange={(e) => setAdminKey(e.target.value)}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       className="w-full bg-white border border-stone-200 rounded-2xl pl-5 pr-12 py-4 text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all font-bold tracking-widest"
-                      placeholder="Enter Master Key"
+                      placeholder="Enter Secure Password"
                     />
                     <button
                       type="button"
-                      onClick={() => setShowAdminKey(!showAdminKey)}
+                      onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-300 hover:text-amber-500 transition-colors p-1"
                     >
-                      {showAdminKey ? <EyeOff size={20} /> : <Eye size={20} />}
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </button>
                   </div>
                 </div>
