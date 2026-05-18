@@ -1,0 +1,288 @@
+// ==========================================
+// GLOBAL CONFIGURATIONS & MASTER DATA CODES
+// ==========================================
+var ENUMERATION_FORM_ID = "1zye_FOutygq87md1zOcKTJU0R_VrYuM9Vuv71Cr9lM8"; 
+var ONBOARDING_FORM_ID = "1NXgqx8jtVwBA7gZNbL0T2OSIAdKL4HtiaebPICdoSbQ";  
+
+var ENUMERATION_SHEET_NAME = "Enumeration"; 
+var ONBOARDING_SHEET_NAME = "Onboarding";   
+var SPREADSHEET_ID = "1J0iC109lYCEUnSuAGnZ7gH-rmxgAS0ctk5aJkfivmJ8"; 
+
+// ==========================================
+// PHASE 1: CORE AUTOMATION & CLOSED-LOOP PIPELINE
+// ==========================================
+
+/**
+ * Automatically updates the onboarding dropdown checklist.
+ * Reads all entries from the Enumeration tab and subtracts those in Onboarding.
+ */
+function syncAndFilterOutlets() {
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  
+  // 1. Fetch all enumerated business names (Column B of Enumeration Sheet)
+  var enumSheet = ss.getSheetByName(ENUMERATION_SHEET_NAME);
+  if (!enumSheet) {
+    Logger.log("Error: Enumeration sheet tab not found. Make sure you renamed the tab.");
+    return;
+  }
+  var enumLastRow = enumSheet.getLastRow();
+  var enumeratedOutlets = [];
+  
+  if (enumLastRow > 1) {
+    var enumValues = enumSheet.getRange(2, 2, enumLastRow - 1, 1).getValues();
+    for (var i = 0; i < enumValues.length; i++) {
+      var name = enumValues[i][0].toString().trim();
+      if (name && enumeratedOutlets.indexOf(name) === -1) {
+        enumeratedOutlets.push(name);
+      }
+    }
+  }
+
+  // 2. Fetch all already onboarded business names (Column B of Onboarding Sheet)
+  var onboardSheet = ss.getSheetByName(ONBOARDING_SHEET_NAME);
+  var onboardedOutlets = [];
+  if (onboardSheet) {
+    var onboardLastRow = onboardSheet.getLastRow();
+    if (onboardLastRow > 1) {
+      var onboardValues = onboardSheet.getRange(2, 2, onboardLastRow - 1, 1).getValues();
+      for (var j = 0; j < onboardValues.length; j++) {
+        var oName = onboardValues[j][0].toString().trim();
+        if (oName) {
+          onboardedOutlets.push(oName);
+        }
+      }
+    }
+  }
+
+  // 3. Filter Outlets: Only keep items that are Enumerated BUT NOT yet Onboarded
+  var availableOutlets = enumeratedOutlets.filter(function(outlet) {
+    return onboardedOutlets.indexOf(outlet) === -1;
+  });
+
+  if (availableOutlets.length === 0) {
+    availableOutlets = ["No pending outlets awaiting onboarding"];
+  }
+
+  // 4. Update the "Verified Outlet Name" question in the Onboarding Form
+  var form = FormApp.openById(ONBOARDING_FORM_ID);
+  var items = form.getItems();
+  var updated = false;
+
+  for (var k = 0; k < items.length; k++) {
+    if (items[k].getTitle() === "Verified Outlet Name" && items[k].getType() === FormApp.ItemType.LIST) {
+      var listItem = items[k].asListItem();
+      listItem.setChoiceValues(availableOutlets);
+      updated = true;
+      Logger.log("Successfully updated Onboarding Dropdown. Available options count: " + availableOutlets.length);
+      break;
+    }
+  }
+  
+  if (!updated) {
+    Logger.log("Warning: Could not find a Dropdown list item titled 'Verified Outlet Name' to update.");
+  }
+}
+
+/**
+ * Helper function to cleanly change the raw text input to a dynamic dropdown selector.
+ */
+function convertTextBoxToDropdown() {
+  var form = FormApp.openById(ONBOARDING_FORM_ID);
+  var items = form.getItems();
+  
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].getTitle() === "Verified Outlet Name") {
+      if (items[i].getType() === FormApp.ItemType.TEXT) {
+        var index = items[i].getIndex();
+        form.deleteItem(items[i]);
+        var dropdown = form.addListItem().setTitle("Verified Outlet Name")
+                           .setHelpText("Select from the list of verified field entries. Completed items are dynamically removed.")
+                           .setRequired(true);
+        form.moveItem(dropdown.getIndex(), index);
+        Logger.log("Converted text input field to dynamic list selector successfully.");
+      }
+      break;
+    }
+  }
+  syncAndFilterOutlets();
+}
+
+// ==========================================
+// PHASE 2: INITIAL ARCHITECTURE GENERATOR (LAYOUT REBUILDS)
+// ==========================================
+
+function buildMealVillaForms() {
+  clearFormItems(ENUMERATION_FORM_ID);
+  clearFormItems(ONBOARDING_FORM_ID);
+  
+  configureEnumerationForm(ENUMERATION_FORM_ID);
+  configureOnboardingForm(ONBOARDING_FORM_ID);
+}
+
+function clearFormItems(formId) {
+  var form = FormApp.openById(formId);
+  var items = form.getItems();
+  for (var i = items.length - 1; i >= 0; i--) {
+    form.deleteItem(items[i]);
+  }
+  Logger.log('Successfully cleared form ID: ' + formId);
+}
+
+function configureEnumerationForm(formId) {
+  var form = FormApp.openById(formId)
+      .setDescription('Purpose: To build a controlled retail distribution network that sells the remaining daily bread production through pre-orders, confirmed payment, route delivery, and daily performance tracking.\n\nCoverage: Uyo and environs | Owner: Commercial and Operations Team');
+  
+  form.addPageBreakItem().setTitle('A. Outlet Identification');
+  form.addTextItem().setTitle('Business Name').setRequired(true);
+  form.addListItem().setTitle('Outlet Type').setChoiceValues(['Supermarket', 'Grocery Store', 'Kiosk', 'Corner Shop', 'Other']).setRequired(true);
+  form.addTextItem().setTitle('Street Address').setRequired(true);
+  form.addTextItem().setTitle('Landmark');
+  form.addTextItem().setTitle('Town or Area').setRequired(true);
+  form.addTextItem().setTitle('GPS Location');
+  form.addTextItem().setTitle('Owner Name');
+  form.addTextItem().setTitle('Manager or Contact Person').setRequired(true);
+  form.addTextItem().setTitle('Phone Number').setRequired(true);
+  form.addTextItem().setTitle('WhatsApp Number');
+  form.addTextItem().setTitle('Email if available');
+  form.addTextItem().setTitle('Opening Time');
+  form.addTextItem().setTitle('Closing Time');
+
+  form.addTextItem()
+      .setTitle('Kiosk / Outlet Storefront Photo (Drive Link)')
+      .setHelpText('Take a picture using your smartphone camera, upload it to Google Drive, and paste the shareable link here.')
+      .setRequired(true);
+
+  form.addPageBreakItem().setTitle('B. Current Bread Sales Information');
+  form.addTextItem().setTitle('Current Bread Supplier');
+  form.addTextItem().setTitle('Average Daily Bread Sales');
+  form.addTextItem().setTitle('Best Selling Bread Size');
+  form.addTextItem().setTitle('Peak Sales Time');
+  form.addTextItem().setTitle('Current Buying Price');
+  form.addTextItem().setTitle('Current Selling Price');
+  form.addTextItem().setTitle('Main Customer Type');
+  form.addListItem().setTitle('Storage Condition').setChoiceValues(['Excellent/Hygiene Showcase', 'Good/Shelved', 'Fair', 'Poor']);
+  form.addMultipleChoiceItem().setTitle('Does outlet sell snacks or drinks?').setChoiceValues(['Yes', 'No']);
+
+  form.addPageBreakItem().setTitle('C. Meal Villa Supply Interest');
+  form.addMultipleChoiceItem().setTitle('Interested in Meal Villa Bread?').setChoiceValues(['Yes', 'No', 'Maybe']).setRequired(true);
+  
+  form.addCheckboxItem().setTitle('Preferred Products').setChoiceValues([
+    'Creamy Delight (Jumbo)', 
+    'Creamy Delight (Family Loaf)', 
+    'Round Bread', 
+    'Big Butter Fresh', 
+    'Small Butter Fresh', 
+    'Milky Bite'
+  ]);
+  
+  form.addTextItem().setTitle('Expected Daily Order Quantity');
+  form.addTextItem().setTitle('Preferred Delivery Time');
+  
+  form.addListItem().setTitle('Payment Method').setChoiceValues(['Transfer', 'Cash']);
+  form.addMultipleChoiceItem().setTitle('Pre-Order by Morning or Evening?').setChoiceValues(['Morning Pre-Order', 'Evening Pre-Order']);
+  form.addMultipleChoiceItem().setTitle('Preferred Delivery by Morning or Evening').setChoiceValues(['Morning Delivery', 'Evening Delivery']);
+  
+  form.addMultipleChoiceItem().setTitle('Can pay before delivery?').setChoiceValues(['Yes', 'No', 'Pay on delivery']);
+  form.addTextItem().setTitle('Credit Request if any');
+  form.addParagraphTextItem().setTitle('Special Requirement');
+
+  form.addPageBreakItem().setTitle('D. Qualification Score');
+  
+  var grid = form.addGridItem();
+  grid.setTitle('Rate the outlet criteria from 1 to 5 (1 = Best, 2 = Good, 3 = Fair, 4 = Poor, 5 = Bad):')
+      .setRows([
+        'Daily Foot Traffic',
+        'Current Bread Sales Volume',
+        'Payment Reliability',
+        'Route Fit',
+        'Storage Hygiene',
+        'Interest in Meal Villa Products',
+        'Pre-Order Readiness',
+        'Growth Potential'
+      ])
+      .setColumns(['1 (Best)', '2 (Good)', '3 (Fair)', '4 (Poor)', '5 (Bad)'])
+      .setRequired(true);
+
+  form.addListItem().setTitle('Outlet Class').setChoiceValues(['A Outlet', 'B Outlet', 'C Outlet', 'D Outlet', 'Watchlist']).setRequired(true);
+  form.addListItem().setTitle('Recommended Action').setChoiceValues(['Approve', 'Pilot', 'Revisit', 'Reject']).setRequired(true);
+
+  form.addPageBreakItem().setTitle('E. Field Officer Declaration');
+  form.addTextItem().setTitle('Field Officer Name').setRequired(true);
+  form.addDateItem().setTitle('Date Visited').setRequired(true);
+  form.addTextItem().setTitle('Supervisor Review');
+  form.addTextItem().setTitle('Management Approval');
+}
+
+function configureOnboardingForm(formId) {
+  var form = FormApp.openById(formId)
+      .setDescription('For approved outlets before first supply\n\nPurpose: To build a controlled retail distribution network that sells the remaining daily bread production through pre-orders, confirmed payment, route delivery, and daily performance tracking.\n\nCoverage: Uyo and environs | Owner: Commercial and Operations Team');
+
+  form.addPageBreakItem().setTitle('3. Outlet Acceptance');
+  
+  // Placed as a structural text input initially; converted during initial setup steps
+  form.addTextItem()
+      .setTitle('Verified Outlet Name')
+      .setRequired(true);
+
+  form.addTextItem().setTitle('Contact Person').setRequired(true);
+  form.addListItem().setTitle('Approved Outlet Class').setChoiceValues(['Class A', 'Class B', 'Class C', 'Class D']).setRequired(true);
+  form.addTextItem().setTitle('Route assigned').setRequired(true);
+  form.addDateItem().setTitle('First supply date approved').setRequired(true);
+  form.addTextItem().setTitle('Approved Credit Limit if any').setRequired(true);
+
+  form.addPageBreakItem().setTitle('1. Onboarding Checklist');
+  
+  var verificationGrid = form.addGridItem();
+  verificationGrid.setTitle('Confirm status or comments for the checklist items:')
+      .setRows([
+        'Outlet details verified',
+        'Contact person confirmed',
+        'Outlet class approved',
+        'Route assigned',
+        'Product list explained',
+        'Price list explained',
+        'Order cut-off time explained',
+        'Payment rule explained',
+        'Credit approval status confirmed',
+        'Delivery time agreed',
+        'Return policy explained',
+        'Complaint channel shared',
+        'Outlet added to active customer list'
+      ])
+      .setColumns(['Done / Confirmed / Explained'])
+      .setRequired(true);
+
+  form.addPageBreakItem().setTitle('2. Standard Supply Terms');
+  
+  var termsCheckbox = form.addCheckboxItem();
+  termsCheckbox.setTitle('The outlet acknowledges and accepts the following Standard Supply Terms:')
+      .setChoices([
+        termsCheckbox.createChoice('Orders must be placed before the approved evening or morning cut-off time.'),
+        termsCheckbox.createChoice('Prepaid outlets must complete payment before delivery is scheduled.'),
+        termsCheckbox.createChoice('Credit supply must be approved by management before goods leave the bakery.'),
+        termsCheckbox.createChoice('Returns must be reported the same day with reason and quantity.'),
+        termsCheckbox.createChoice('Damaged goods due to poor outlet storage will not qualify for return.'),
+        termsCheckbox.createChoice('Repeated late payment may lead to supply suspension.'),
+        termsCheckbox.createChoice('Meal Villa may adjust route timing based on logistics efficiency.')
+      ])
+      .setRequired(true);
+
+  form.addPageBreakItem().setTitle('Signatures & Acknowledgment');
+  form.addTextItem().setTitle('Meal Villa Representative Name / Signature').setRequired(true);
+  form.addDateItem().setTitle('Date').setRequired(true);
+  form.addMultipleChoiceItem().setTitle('Has the physical document been signed by the outlet?').setChoiceValues(['Yes, Signature Captured', 'Pending Signature']).setRequired(true);
+
+  Logger.log('Layout Generation Sequence finished.');
+}
+
+
+
+
+
+Please make the following adjustments:
+Preferred Products: Creamy Delight (Jumbo), Creamy Delight (Family Loaf), Round Bread, Big Butter Fresh, Small Butter Fresh, Milky Bite
+Payment Method: Transfer, Cash
+Can pay before ? Yes / No / Pay on delivery
+Qualification Score Rate the outlet criteria from 1 to 5, with 1= Best, 2= good, 3= fair, 4= poor, 5= bad
+You said you'll put where the evaluator can take a picture of the kiosk and upload
+Then in the validators side, it’ll list the responses of the places with selection of places, the validator can select after the enumeration has been done

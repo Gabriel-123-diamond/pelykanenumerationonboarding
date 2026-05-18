@@ -1,0 +1,10 @@
+// ALL FEATURES FROM LEGACY GOOGLE FORMS AND SCRIPTS (NNA.TXT) HAVE BEEN MIGRATED.
+// 
+// MIGRATED MODULES:
+// 1. Identification: Name, Type, Address, GPS, Owner, Manager, Email, Phone, WhatsApp, Hours.
+// 2. Intelligence: Supplier, Sales Vol, Prices, Customer Type, Storage, Products.
+// 3. Interest: Preferred Products, Quantity, Cycle, Payment, Villa Interest.
+// 4. Qualification: 8-Category Matrix, Algorithmic Grading (A-D), Executive Action (Approve/Pilot/etc).
+// 5. Onboarding: Checklist (13 items), Terms (7 items), Signatures, Credit Limits, First Supply.
+// 
+// This file is now redundant and can be archived.

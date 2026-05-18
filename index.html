@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pelykan-foods</title>
+  </head>
+  <body>
+    <div id="root">
+      <div style="padding: 20px; font-family: sans-serif;">
+        Loading Pelykan Foods Distribution System...
+        <p style="font-size: 12px; color: #666;">If this message persists, there may be a Javascript error. Please check the console (F12).</p>
+      </div>
+    </div>
+    <script>
+      window.onerror = function(msg, url, line, col, error) {
+        document.body.innerHTML = '<div style="color: red; padding: 20px;"><h1>Critical Error</h1><pre>' + msg + '\n' + url + ':' + line + '</pre></div>';
+        return false;
+      };
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
