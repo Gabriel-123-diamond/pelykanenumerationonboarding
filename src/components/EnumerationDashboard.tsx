@@ -18,6 +18,7 @@ const initialEvaluation: EvaluationMatrix = {
 
 const initialFormData: Partial<Outlet> = {
   name: '', type: 'Supermarket', address: '', landmark: '', town: '', gps: '',
+  latitude: '', longitude: '',
   ownerName: '', contactPerson: '', phone: '', whatsapp: '', email: '', 
   openingTime: '08:00', closingTime: '21:00', currentSupplier: '', 
   avgDailySales: '', bestSellingSize: '', peakSalesTime: '', 

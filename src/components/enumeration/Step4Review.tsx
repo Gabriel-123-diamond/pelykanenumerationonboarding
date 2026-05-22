@@ -49,7 +49,7 @@ export const Step4Review: React.FC<Step4Props> = ({
           <div className="bg-white/5 p-5 rounded-2xl border border-white/5">
             <p className="text-[9px] font-black text-amber-500 uppercase tracking-[0.2em] mb-2 italic">Class Definition & Action</p>
             <p className="text-[11px] font-bold text-stone-300 leading-relaxed">
-              {recommendedClass === 'A' ? "Strong supermarket or high-volume provision shop. Target 30 to 100 plus loaves daily. May qualify for approved short credit." : 
+              {recommendedClass === 'A' ? "Strong supermarket or high-volume provision store. Target 30 to 100 plus loaves daily. May qualify for approved short credit." : 
                recommendedClass === 'B' ? "Medium volume shop with stable daily sales. Target 10 to 30 loaves daily. Prepaid or one-day approved credit." :
                recommendedClass === 'C' ? "Small shop with growth potential. Target 5 to 10 loaves daily. Strictly prepaid." :
                recommendedClass === 'D' ? "Poor location, weak demand, poor storage, or low interest. Do not supply until improved." : 

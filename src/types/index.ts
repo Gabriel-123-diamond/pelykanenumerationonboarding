@@ -43,6 +43,8 @@ export interface Outlet {
   address: string;
   landmark: string;
   town: string;
+  latitude?: string;
+  longitude?: string;
   gps: string;
   ownerName: string;
   contactPerson: string;

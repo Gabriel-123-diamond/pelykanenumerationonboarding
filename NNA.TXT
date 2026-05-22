@@ -134,7 +134,7 @@ function configureEnumerationForm(formId) {
   
   form.addPageBreakItem().setTitle('A. Outlet Identification');
   form.addTextItem().setTitle('Business Name').setRequired(true);
-  form.addListItem().setTitle('Outlet Type').setChoiceValues(['Supermarket', 'Grocery Store', 'Kiosk', 'Corner Shop', 'Other']).setRequired(true);
+  form.addListItem().setTitle('Outlet Type').setChoiceValues(['Supermarket', 'Provision Store', 'Kiosk', 'Corner Shop', 'Other']).setRequired(true);
   form.addTextItem().setTitle('Street Address').setRequired(true);
   form.addTextItem().setTitle('Landmark');
   form.addTextItem().setTitle('Town or Area').setRequired(true);
