@@ -164,7 +164,11 @@ export const EnumerationDashboard: React.FC = () => {
     }
   };
 
-  const { total, recommendedClass } = calculateScore();
+  const stats = {
+    total: history.length,
+    active: history.filter(o => o.status === 'active_customer').length,
+    pending: history.filter(o => o.status === 'pending_onboarding' || o.status === 'enumerated').length
+  };
 
   return (
     <div className="min-h-screen bg-[#FDFCFB] pb-24">
@@ -210,6 +214,21 @@ export const EnumerationDashboard: React.FC = () => {
       </header>
 
       <main className="max-w-2xl mx-auto p-6 mt-6">
+        <div className="grid grid-cols-3 gap-4 mb-10 animate-in fade-in slide-in-from-top-4 duration-700">
+          <div className="bg-white p-5 rounded-[2rem] border border-amber-100 shadow-xl shadow-stone-200/50 flex flex-col items-center text-center">
+            <p className="text-[7px] font-black text-stone-400 uppercase tracking-widest mb-1">Total Captured</p>
+            <p className="text-xl font-black text-stone-900 italic leading-none">{stats.total}</p>
+          </div>
+          <div className="bg-white p-5 rounded-[2rem] border border-amber-100 shadow-xl shadow-stone-200/50 flex flex-col items-center text-center">
+            <p className="text-[7px] font-black text-amber-600 uppercase tracking-widest mb-1">Live/Active</p>
+            <p className="text-xl font-black text-amber-600 italic leading-none">{stats.active}</p>
+          </div>
+          <div className="bg-stone-900 p-5 rounded-[2rem] shadow-xl shadow-black/20 flex flex-col items-center text-center">
+            <p className="text-[7px] font-black text-stone-500 uppercase tracking-widest mb-1">In Review</p>
+            <p className="text-xl font-black text-white italic leading-none">{stats.pending}</p>
+          </div>
+        </div>
+
         {activeTab === 'new' ? (
           <>
             {step === 1 && <Step1Profile formData={formData} setFormData={setFormData} photos={photos} setPhotos={setPhotos} phoneError={phoneError} setPhoneError={setPhoneError} whatsappError={whatsappError} setWhatsappError={setWhatsappError} />}

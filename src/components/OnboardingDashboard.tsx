@@ -28,21 +28,30 @@ export const OnboardingDashboard: React.FC = () => {
 
   const selectedOutlet = outlets.find(o => o.id === selectedOutletId);
 
+  const stats = {
+    pending: outlets.length,
+    activated: history.length,
+    declined: history.filter(o => o.status === 'rejected').length // This history query in useEffect already filters by staff uid
+  };
+
+  // Need to also fetch rejections in the history effect if we want to show them accurately.
+  // Currently history only fetches 'active_customer'.
+  
   useEffect(() => {
     if (!profile) return;
     const q = query(
       collection(db, 'outlets'), 
-      where('status', '==', 'active_customer'),
+      where('status', 'in', ['active_customer', 'rejected']),
       where('activationDetails.onboardingStaffUid', '==', profile.uid),
       orderBy('updatedAt', 'desc')
     );
     const unsubscribeHistory = onSnapshot(q, (snapshot) => {
       setHistory(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Outlet[]);
     }, () => {
-      // Fallback for missing index
+      // Fallback
       const fallbackQ = query(
         collection(db, 'outlets'), 
-        where('status', '==', 'active_customer'),
+        where('status', 'in', ['active_customer', 'rejected']),
         where('activationDetails.onboardingStaffUid', '==', profile.uid)
       );
       return onSnapshot(fallbackQ, (snapshot) => {
@@ -53,49 +62,15 @@ export const OnboardingDashboard: React.FC = () => {
     return () => unsubscribeHistory();
   }, [profile]);
 
-  const handleUpdateOutlet = async (id: string, data: any) => {
-    try { await updateDoc(doc(db, 'outlets', id), { ...data, updatedAt: Timestamp.now() }); }
-    catch { alert("Update failed."); }
-  };
-
-  const handleFinalize = async (id: string) => {
-    if (!profile) return;
-    try {
-      await updateDoc(doc(db, 'outlets', id), { 
-        status: 'active_customer', 
-        updatedAt: Timestamp.now(),
-        activationDetails: {
-          representativeName: profile.name,
-          onboardingStaffUid: profile.uid,
-          date: new Date().toISOString()
-        }
-      });
-      alert("Account Activated! Moving to live distribution list.");
-    } catch { alert("Activation failed."); }
-  };
-
-  const handleDecline = async (id: string) => {
-    if (!profile) return;
-    try {
-      await updateDoc(doc(db, 'outlets', id), { 
-        status: 'rejected', 
-        updatedAt: Timestamp.now(),
-        activationDetails: {
-          representativeName: profile.name,
-          onboardingStaffUid: profile.uid,
-          date: new Date().toISOString()
-        }
-      });
-      alert("Customer declined.");
-    } catch { alert("Decline failed."); }
-  };
-
   if (loading) return (
     <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center gap-6">
       <div className="animate-spin rounded-full h-16 w-16 border-4 border-amber-600/20 border-t-amber-600" />
       <p className="text-amber-600/50 text-[10px] font-black uppercase tracking-[0.4em]">Initializing Onboarding Pipeline</p>
     </div>
   );
+
+  const activatedCount = history.filter(o => o.status === 'active_customer').length;
+  const rejectedCount = history.filter(o => o.status === 'rejected').length;
 
   return (
     <div className="min-h-screen bg-[#FDFCFB]">
@@ -108,7 +83,7 @@ export const OnboardingDashboard: React.FC = () => {
                 {activeTab === 'queue' ? 'Onboarding Control' : 'Activation History'}
               </h1>
               <p className="text-amber-500/60 text-[10px] font-black tracking-[0.4em] mt-1">
-                {activeTab === 'queue' ? 'Verification & Pipeline Management' : `Successfully Activated: ${history.length} Outlets`}
+                {activeTab === 'queue' ? 'Verification & Pipeline Management' : `Performance Overview • ${activatedCount} Activations`}
               </p>
             </div>
           </div>
@@ -130,18 +105,38 @@ export const OnboardingDashboard: React.FC = () => {
                   activeTab === 'history' ? "bg-amber-600 text-white shadow-lg" : "text-stone-500 hover:text-stone-300"
                 )}
               >
-                <Clock size={16} /> My Activations
+                <Clock size={16} /> My History
               </button>
-            </div>
-            <div className="bg-stone-900 border border-stone-800 px-6 py-3 rounded-2xl hidden lg:block">
-              <p className="text-[10px] font-black text-stone-500 uppercase tracking-widest mb-1">Queue Status</p>
-              <p className="text-xl font-black text-amber-500 italic">{outlets.length} Pending</p>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto py-16 px-8">
+      <main className="max-w-7xl mx-auto py-12 px-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 animate-in fade-in slide-in-from-top-4 duration-700">
+          <div className="bg-white p-8 rounded-[2.5rem] border border-amber-100 shadow-xl shadow-stone-200/50 flex items-center gap-6">
+            <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 shadow-inner"><ListChecks size={28} /></div>
+            <div>
+              <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-1">In Queue</p>
+              <p className="text-3xl font-black text-stone-900 italic leading-none">{outlets.length}</p>
+            </div>
+          </div>
+          <div className="bg-white p-8 rounded-[2.5rem] border border-amber-100 shadow-xl shadow-stone-200/50 flex items-center gap-6">
+            <div className="w-16 h-16 bg-stone-100 rounded-2xl flex items-center justify-center text-stone-600 shadow-inner"><CheckCircle size={28} /></div>
+            <div>
+              <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-1">Activated</p>
+              <p className="text-3xl font-black text-stone-900 italic leading-none">{activatedCount}</p>
+            </div>
+          </div>
+          <div className="bg-stone-950 p-8 rounded-[2.5rem] shadow-xl shadow-black/20 flex items-center gap-6">
+            <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center text-amber-500 shadow-inner border border-white/5"><XCircle size={28} /></div>
+            <div>
+              <p className="text-[10px] font-black text-stone-500 uppercase tracking-widest mb-1">Declined</p>
+              <p className="text-3xl font-black text-white italic leading-none">{rejectedCount}</p>
+            </div>
+          </div>
+        </div>
+
         {activeTab === 'queue' ? (
           <div className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
             {outlets.length === 0 ? (

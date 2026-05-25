@@ -34,9 +34,21 @@ export const AdminDashboard: React.FC = () => {
     catch { alert("Failed to approve user."); }
   };
 
-  const getStaffMetrics = (name: string) => {
-    const staffOutlets = outlets.filter(o => o.fieldOfficerName === name);
-    return { count: staffOutlets.length, active: staffOutlets.filter(o => o.status === 'active_customer').length, pending: staffOutlets.filter(o => o.status !== 'active_customer').length };
+  const getStaffMetrics = (staff: UserProfile) => {
+    if (staff.role === 'onboarding') {
+      const staffHistory = outlets.filter(o => o.activationDetails?.onboardingStaffUid === staff.uid);
+      return { 
+        count: staffHistory.length, 
+        active: staffHistory.filter(o => o.status === 'active_customer').length, 
+        pending: staffHistory.filter(o => o.status === 'rejected').length 
+      };
+    }
+    const staffOutlets = outlets.filter(o => o.fieldOfficerName === staff.name);
+    return { 
+      count: staffOutlets.length, 
+      active: staffOutlets.filter(o => o.status === 'active_customer').length, 
+      pending: staffOutlets.filter(o => o.status !== 'active_customer' && o.status !== 'rejected').length 
+    };
   };
 
   const pendingUsers = users.filter(u => !u.isApproved);

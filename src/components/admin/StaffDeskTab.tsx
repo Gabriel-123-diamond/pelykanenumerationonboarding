@@ -83,7 +83,7 @@ export const StaffDeskTab: React.FC<StaffDeskTabProps> = ({
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {filteredStaff.map((staff) => {
-              const metrics = getStaffMetrics(staff.name);
+              const metrics = getStaffMetrics(staff);
               const progressPercent = metrics.count > 0 ? (metrics.active / metrics.count) * 100 : 0;
               return (
                 <div key={staff.uid} className="bg-white rounded-[2.5rem] p-8 border border-amber-100 shadow-sm hover:shadow-2xl transition-all duration-500 group relative overflow-hidden">
@@ -100,21 +100,29 @@ export const StaffDeskTab: React.FC<StaffDeskTabProps> = ({
                   </div>
                   <div className="grid grid-cols-3 gap-4 mb-8 relative z-10">
                     <div className="bg-stone-50 p-4 rounded-2xl border border-stone-100">
-                      <p className="text-[8px] font-black text-stone-400 uppercase tracking-widest mb-1">Total</p>
+                      <p className="text-[8px] font-black text-stone-400 uppercase tracking-widest mb-1">
+                        {staff.role === 'onboarding' ? 'Completed' : 'Total'}
+                      </p>
                       <p className="text-xl font-black text-stone-900 italic">{metrics.count}</p>
                     </div>
                     <div className="bg-amber-50/50 p-4 rounded-2xl border border-amber-100">
-                      <p className="text-[8px] font-black text-amber-700 uppercase tracking-widest mb-1">Active</p>
+                      <p className="text-[8px] font-black text-amber-700 uppercase tracking-widest mb-1">
+                        {staff.role === 'onboarding' ? 'Activated' : 'Active'}
+                      </p>
                       <p className="text-xl font-black text-amber-600 italic">{metrics.active}</p>
                     </div>
                     <div className="bg-stone-950 p-4 rounded-2xl">
-                      <p className="text-[8px] font-black text-stone-500 uppercase tracking-widest mb-1">Pending</p>
+                      <p className="text-[8px] font-black text-stone-500 uppercase tracking-widest mb-1">
+                        {staff.role === 'onboarding' ? 'Rejected' : 'Pending'}
+                      </p>
                       <p className="text-xl font-black text-white italic">{metrics.pending}</p>
                     </div>
                   </div>
                   <div className="relative z-10">
                     <div className="flex justify-between items-center mb-2">
-                      <p className="text-[9px] font-black text-stone-400 uppercase tracking-widest italic">Activation Success Rate</p>
+                      <p className="text-[9px] font-black text-stone-400 uppercase tracking-widest italic">
+                        {staff.role === 'onboarding' ? 'Activation Ratio' : 'Activation Success Rate'}
+                      </p>
                       <p className="text-[10px] font-black text-amber-600 italic">{progressPercent.toFixed(0)}%</p>
                     </div>
                     <div className="h-2 bg-stone-100 rounded-full overflow-hidden border border-stone-200 shadow-inner">
