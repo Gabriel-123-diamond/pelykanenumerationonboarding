@@ -46,8 +46,26 @@ export const Step3Evaluation: React.FC<Step3Props> = ({ evaluation, setEvaluatio
                   className="w-full h-3 bg-stone-100 rounded-full appearance-none cursor-pointer accent-amber-600 border border-stone-200"
                 />
                 <div className="flex justify-between text-[8px] text-stone-400 font-black uppercase tracking-widest mt-3 px-1">
-                  <span>High Grade (1)</span>
-                  <span>Low Grade (5)</span>
+                  <div className="flex flex-col items-start gap-1">
+                    <span className="text-amber-600">High Grade (1)</span>
+                    <span className="text-[7px] opacity-50">Excellent</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-1">
+                    <span>(2)</span>
+                    <span className="text-[7px] opacity-50">Good</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-1">
+                    <span>(3)</span>
+                    <span className="text-[7px] opacity-50">Average</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-1">
+                    <span>(4)</span>
+                    <span className="text-[7px] opacity-50">Below Avg</span>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="text-orange-600">Low Grade (5)</span>
+                    <span className="text-[7px] opacity-50">Poor</span>
+                  </div>
                 </div>
               </div>
             </div>

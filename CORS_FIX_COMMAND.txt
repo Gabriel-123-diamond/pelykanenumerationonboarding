@@ -1,0 +1,12 @@
+### FIREBASE STORAGE CORS FIX COMMAND ###
+
+Since your local 'gsutil' command is having permission errors, follow these steps to fix the "Cross-Origin Request Blocked" error:
+
+1. Open your browser and go to: https://console.cloud.google.com/
+2. Ensure your project "pelykansolutions" is selected at the top.
+3. Click the "Activate Cloud Shell" button in the top right header (the icon looks like >_ ).
+4. Copy and paste the ENTIRE command below into the Cloud Shell window and press Enter:
+
+echo '[{"origin": ["*"],"method": ["GET", "PUT", "POST", "DELETE", "HEAD"],"responseHeader": ["Content-Type", "Authorization", "x-goog-resumable"],"maxAgeSeconds": 3600}]' > cors.json && gsutil cors set cors.json gs://pelykansolutions.firebasestorage.app
+
+########################################

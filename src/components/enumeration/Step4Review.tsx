@@ -1,11 +1,8 @@
 import React from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import type { Outlet } from '../../types';
 
 interface Step4Props {
-  formData: Partial<Outlet>;
-  setFormData: (data: Partial<Outlet>) => void;
   recommendedClass: string;
   total: number;
   handleSubmit: () => void;
@@ -13,7 +10,7 @@ interface Step4Props {
 }
 
 export const Step4Review: React.FC<Step4Props> = ({
-  formData, setFormData, recommendedClass, total, handleSubmit, loading
+  recommendedClass, total, handleSubmit, loading
 }) => {
   return (
     <div className="space-y-8 animate-in slide-in-from-right-8 duration-500">
@@ -58,44 +55,6 @@ export const Step4Review: React.FC<Step4Props> = ({
           </div>
         </div>
       </div>
-
-      <section className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-stone-200/50 border border-amber-100/50">
-        <h3 className="text-[10px] font-black text-stone-400 uppercase tracking-[0.3em] mb-8">Executive Decision</h3>
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest ml-1">Proposed Action</label>
-            <select
-              value={formData.recommendedAction}
-              onChange={(e) => setFormData({ ...formData, recommendedAction: e.target.value as any })}
-              className="w-full bg-stone-50 border border-stone-100 rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 appearance-none"
-            >
-              <option value="Approve">Full Approval (Grade A/B)</option>
-              <option value="Pilot">Pilot Supply (Grade C)</option>
-              <option value="Revisit">Revisit / Watchlist</option>
-              <option value="Reject">Decline Supply (Grade D)</option>
-            </select>
-          </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest ml-1">Supervisor Review</label>
-            <textarea
-              value={formData.supervisorReview}
-              onChange={(e) => setFormData({ ...formData, supervisorReview: e.target.value })}
-              className="w-full bg-stone-50 border border-stone-100 rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 h-24 resize-none"
-              placeholder="Supervisor comments..."
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest ml-1">Management Approval</label>
-            <input
-              type="text"
-              value={formData.managementApproval || ''}
-              onChange={(e) => setFormData({ ...formData, managementApproval: e.target.value })}
-              className="w-full bg-stone-50 border border-stone-100 rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500"
-              placeholder="Approval status or signature code..."
-            />
-          </div>
-        </div>
-      </section>
 
       <section className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-stone-200/50 border border-amber-100/50">
         <h3 className="text-[10px] font-black text-stone-400 uppercase tracking-[0.3em] mb-6">Final Attestation</h3>

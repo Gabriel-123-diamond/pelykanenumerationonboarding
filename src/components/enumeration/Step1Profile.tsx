@@ -14,6 +14,35 @@ interface Step1Props {
   setWhatsappError: (err: string | null) => void;
 }
 
+const TimeSelect = ({ label, value, onChange }: { label: string, value: string, onChange: (val: string) => void }) => {
+  const [h, m] = (value || '08:00').split(':');
+  const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
+  const minutes = ['00', '15', '30', '45'];
+
+  return (
+    <div className="space-y-2">
+      <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest ml-1">{label}</label>
+      <div className="flex gap-2">
+        <select
+          value={h}
+          onChange={(e) => onChange(`${e.target.value}:${m}`)}
+          className="flex-1 bg-stone-50 border border-stone-100 rounded-2xl px-4 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 appearance-none text-center"
+        >
+          {hours.map(hr => <option key={hr} value={hr}>{hr}</option>)}
+        </select>
+        <div className="flex items-center text-stone-300 font-black">:</div>
+        <select
+          value={m}
+          onChange={(e) => onChange(`${h}:${e.target.value}`)}
+          className="flex-1 bg-stone-50 border border-stone-100 rounded-2xl px-4 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 appearance-none text-center"
+        >
+          {minutes.map(min => <option key={min} value={min}>{min}</option>)}
+        </select>
+      </div>
+    </div>
+  );
+};
+
 export const Step1Profile: React.FC<Step1Props> = ({
   formData, setFormData, photos, setPhotos, phoneError, setPhoneError, whatsappError, setWhatsappError
 }) => {
@@ -30,35 +59,6 @@ export const Step1Profile: React.FC<Step1Props> = ({
   const removeExistingPhoto = (url: string) => {
     const updated = (formData.photoUrls || []).filter(u => u !== url);
     setFormData({ ...formData, photoUrls: updated });
-  };
-
-  const TimeSelect = ({ label, value, onChange }: { label: string, value: string, onChange: (val: string) => void }) => {
-    const [h, m] = (value || '08:00').split(':');
-    const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
-    const minutes = ['00', '15', '30', '45'];
-
-    return (
-      <div className="space-y-2">
-        <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest ml-1">{label}</label>
-        <div className="flex gap-2">
-          <select
-            value={h}
-            onChange={(e) => onChange(`${e.target.value}:${m}`)}
-            className="flex-1 bg-stone-50 border border-stone-100 rounded-2xl px-4 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 appearance-none text-center"
-          >
-            {hours.map(hr => <option key={hr} value={hr}>{hr}</option>)}
-          </select>
-          <div className="flex items-center text-stone-300 font-black">:</div>
-          <select
-            value={m}
-            onChange={(e) => onChange(`${h}:${e.target.value}`)}
-            className="flex-1 bg-stone-50 border border-stone-100 rounded-2xl px-4 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 appearance-none text-center"
-          >
-            {minutes.map(min => <option key={min} value={min}>{min}</option>)}
-          </select>
-        </div>
-      </div>
-    );
   };
 
   return (
@@ -181,41 +181,35 @@ export const Step1Profile: React.FC<Step1Props> = ({
                 {whatsappError && <p className="text-[9px] font-black text-amber-600 uppercase tracking-tighter ml-1 mt-1">{whatsappError}</p>}
                 </div>
                 </div>
-                <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest ml-1">Latitude</label>
-                <input
-                type="text"
-                value={formData.latitude || ''}
-                onChange={(e) => {
-                  const lat = e.target.value;
-                  setFormData({ 
-                    ...formData, 
-                    latitude: lat,
-                    gps: `${lat}, ${formData.longitude || ''}`
-                  });
-                }}
-                className="w-full bg-stone-50 border border-stone-100 rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500"
-                placeholder="6.465422"
-                />
-                </div>
-                <div className="space-y-2">
-                <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest ml-1">Longitude</label>
-                <input
-                type="text"
-                value={formData.longitude || ''}
-                onChange={(e) => {
-                  const lng = e.target.value;
-                  setFormData({ 
-                    ...formData, 
-                    longitude: lng,
-                    gps: `${formData.latitude || ''}, ${lng}`
-                  });
-                }}
-                className="w-full bg-stone-50 border border-stone-100 rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500"
-                placeholder="3.406448"
-                />
-                </div>
+                  <div className="flex justify-between items-end mb-1">
+                    <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest ml-1">GPS Coordinates (Lat, Long)</label>
+                    <a 
+                      href="https://www.gps-coordinates.net/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-[9px] font-black text-amber-600 hover:text-stone-950 underline uppercase tracking-widest flex items-center gap-1.5 transition-colors"
+                    >
+                      <MapPin size={10} /> Find on Map
+                    </a>
+                  </div>
+                  <input
+                    type="text"
+                    value={formData.gps || ''}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const [lat, lng] = val.split(',').map(s => s.trim());
+                      setFormData({ 
+                        ...formData, 
+                        gps: val,
+                        latitude: lat || '',
+                        longitude: lng || ''
+                      });
+                    }}
+                    className="w-full bg-stone-50 border border-stone-100 rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    placeholder="e.g. 6.465422, 3.406448"
+                  />
+                  <p className="text-[8px] font-medium text-stone-400 italic ml-1 mt-1 uppercase tracking-widest">Format: Latitude, Longitude (Separated by comma)</p>
                 </div>          <div className="space-y-2">
             <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest ml-1">Street Address</label>
             <input

@@ -19,25 +19,31 @@ service cloud.firestore {
     
     // Outlet Rules
     match /outlets/{outletId} {
+      // Helper for role checks
+      function hasRole(role) {
+        return request.auth != null && 
+          exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == role;
+      }
+
       // 1. Admin can do everything
       allow read, write: if isAdmin();
       
-      // 2. Enumeration Staff can create and read
-      allow create, read: if request.auth != null && (
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'enumeration'
-      );
+      // 2. Enumeration Staff can create, read, and update THEIR OWN entries
+      allow create: if hasRole('enumeration');
+      allow read: if hasRole('enumeration') || hasRole('onboarding');
+      allow update: if hasRole('enumeration') && 
+        resource.data.fieldOfficerUid == request.auth.uid &&
+        request.resource.data.status == 'enumerated'; // Can only edit while in enumeration stage
       
-      // 3. Onboarding Staff can read and update specific fields
-      allow read: if request.auth != null && (
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'onboarding'
-      );
-      allow update: if request.auth != null && 
-        exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'onboarding'
-        && request.resource.data.diff(resource.data).affectedKeys()
-           .hasAny(['status', 'onboardingChecklist', 'activationDetails', 'updatedAt']);
+      // 3. Onboarding Staff can read and update (for cross-checking and activation)
+      allow update: if hasRole('onboarding') && 
+        request.resource.data.diff(resource.data).affectedKeys()
+           .hasAny([
+             'status', 'onboardingChecklist', 'activationDetails', 'updatedAt',
+             'recommendedClass', 'recommendedAction', 'supervisorReview', 'managementApproval',
+             'route', 'firstSupplyDate', 'approvedCreditLimit', 'physicalDocumentSigned'
+           ]);
     }
   }
 }

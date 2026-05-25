@@ -95,7 +95,7 @@ export const EnumerationDashboard: React.FC = () => {
     // B: 13-20 (Stable/Good)
     // C: 21-28 (Growth Potential)
     // D: 29-40 (Low Viability)
-    let recommendedClass: 'A' | 'B' | 'C' | 'D' | 'Watchlist' = 
+    const recommendedClass: 'A' | 'B' | 'C' | 'D' | 'Watchlist' = 
       total <= 12 ? 'A' : 
       total <= 20 ? 'B' : 
       total <= 28 ? 'C' : 'D';
@@ -133,12 +133,19 @@ export const EnumerationDashboard: React.FC = () => {
         status,
         fieldOfficerName: profile.name,
         fieldOfficerUid: profile.uid,
-        managementApproval: formData.managementApproval || 'Pending Review',
+        managementApproval: formData.managementApproval || '',
         dateVisited: editingOutletId ? formData.dateVisited : new Date().toISOString(),
         updatedAt: Timestamp.now(),
       };
 
       if (editingOutletId) {
+        // Double check ownership in UI before update (rules will also enforce this)
+        const outlet = history.find(o => o.id === editingOutletId);
+        if (outlet && outlet.fieldOfficerUid !== profile.uid) {
+           alert("Unauthorized: You can only edit your own captures.");
+           resetForm();
+           return;
+        }
         await updateDoc(doc(db, 'outlets', editingOutletId), payload);
         alert("Outlet successfully updated!");
       } else {
@@ -208,7 +215,7 @@ export const EnumerationDashboard: React.FC = () => {
             {step === 1 && <Step1Profile formData={formData} setFormData={setFormData} photos={photos} setPhotos={setPhotos} phoneError={phoneError} setPhoneError={setPhoneError} whatsappError={whatsappError} setWhatsappError={setWhatsappError} />}
             {step === 2 && <Step2Intelligence formData={formData} setFormData={setFormData} />}
             {step === 3 && <Step3Evaluation evaluation={evaluation} setEvaluation={setEvaluation} initialEvaluation={initialEvaluation} />}
-            {step === 4 && <Step4Review formData={formData} setFormData={setFormData} recommendedClass={recommendedClass} total={total} handleSubmit={handleSubmit} loading={loading} />}
+            {step === 4 && <Step4Review recommendedClass={recommendedClass} total={total} handleSubmit={handleSubmit} loading={loading} />}
 
             <div className="mt-12 mb-20 flex justify-between items-center bg-white p-8 rounded-[2.5rem] border border-amber-100 shadow-xl shadow-stone-200/50">
               <button 
@@ -225,13 +232,21 @@ export const EnumerationDashboard: React.FC = () => {
               >
                 {step === 1 && editingOutletId ? "Cancel Edit" : "Back"}
               </button>
-              <button onClick={() => {
-                if (step === 1) {
-                  if (!validatePhoneNumber(formData.phone || '')) { setPhoneError("Use format: 091... (11 digits) or +234..."); return; }
-                  if (formData.whatsapp && !validatePhoneNumber(formData.whatsapp)) { setWhatsappError("Use format: 091... (11 digits) or +234..."); return; }
-                }
-                setStep(prev => Math.min(4, prev + 1));
-              }} disabled={step === 4 || loading} className="bg-stone-950 text-white px-10 py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl shadow-black/20 active:scale-95 disabled:opacity-30 transition-all hover:bg-amber-600">
+              <button 
+                onClick={() => {
+                  if (step === 1) {
+                    if (!validatePhoneNumber(formData.phone || '')) { setPhoneError("Use format: 091... (11 digits) or +234..."); return; }
+                    if (formData.whatsapp && !validatePhoneNumber(formData.whatsapp)) { setWhatsappError("Use format: 091... (11 digits) or +234..."); return; }
+                  }
+                  if (step === 4) {
+                    handleSubmit();
+                  } else {
+                    setStep(prev => Math.min(4, prev + 1));
+                  }
+                }} 
+                disabled={loading} 
+                className="bg-stone-950 text-white px-10 py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl shadow-black/20 active:scale-95 disabled:opacity-30 transition-all hover:bg-amber-600"
+              >
                 {step === 4 ? (loading ? "Saving..." : "Submit Review") : "Continue"}
               </button>
             </div>
