@@ -234,7 +234,10 @@ export const EnumerationDashboard: React.FC = () => {
             {step === 1 && <Step1Profile formData={formData} setFormData={setFormData} photos={photos} setPhotos={setPhotos} phoneError={phoneError} setPhoneError={setPhoneError} whatsappError={whatsappError} setWhatsappError={setWhatsappError} />}
             {step === 2 && <Step2Intelligence formData={formData} setFormData={setFormData} />}
             {step === 3 && <Step3Evaluation evaluation={evaluation} setEvaluation={setEvaluation} initialEvaluation={initialEvaluation} />}
-            {step === 4 && <Step4Review recommendedClass={recommendedClass} total={total} handleSubmit={handleSubmit} loading={loading} />}
+            {step === 4 && (() => {
+              const { total, recommendedClass } = calculateScore();
+              return <Step4Review recommendedClass={recommendedClass} total={total} handleSubmit={handleSubmit} loading={loading} />;
+            })()}
 
             <div className="mt-12 mb-20 flex justify-between items-center bg-white p-8 rounded-[2.5rem] border border-amber-100 shadow-xl shadow-stone-200/50">
               <button 

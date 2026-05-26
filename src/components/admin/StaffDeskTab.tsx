@@ -11,7 +11,7 @@ interface StaffDeskTabProps {
   setStaffRoleFilter: (val: string) => void;
   totalStaff: number;
   handleApproveUser: (uid: string) => void;
-  getStaffMetrics: (name: string) => { count: number, active: number, pending: number };
+  getStaffMetrics: (staff: UserProfile) => { count: number, active: number, pending: number };
 }
 
 export const StaffDeskTab: React.FC<StaffDeskTabProps> = ({

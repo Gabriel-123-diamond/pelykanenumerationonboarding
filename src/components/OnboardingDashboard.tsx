@@ -3,7 +3,7 @@ import { db } from '../lib/firebase';
 import { collection, query, where, onSnapshot, doc, updateDoc, Timestamp, orderBy } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import type { Outlet } from '../types';
-import { LayoutDashboard, Clock, CheckCircle, ListChecks, Store } from 'lucide-react';
+import { LayoutDashboard, Clock, CheckCircle, ListChecks, Store, XCircle } from 'lucide-react';
 import { OnboardingCard } from './onboarding/OnboardingCard';
 import { cn } from '../lib/utils';
 
@@ -28,15 +28,51 @@ export const OnboardingDashboard: React.FC = () => {
 
   const selectedOutlet = outlets.find(o => o.id === selectedOutletId);
 
-  const stats = {
-    pending: outlets.length,
-    activated: history.length,
-    declined: history.filter(o => o.status === 'rejected').length // This history query in useEffect already filters by staff uid
+  const handleUpdateOutlet = async (id: string, data: any) => {
+    try {
+      await updateDoc(doc(db, 'outlets', id), {
+        ...data,
+        updatedAt: Timestamp.now()
+      });
+    } catch (err) {
+      console.error("Update failed:", err);
+    }
   };
 
-  // Need to also fetch rejections in the history effect if we want to show them accurately.
-  // Currently history only fetches 'active_customer'.
-  
+  const handleFinalize = async (id: string) => {
+    if (!profile) return;
+    try {
+      await updateDoc(doc(db, 'outlets', id), {
+        status: 'active_customer',
+        'activationDetails.date': new Date().toISOString(),
+        'activationDetails.onboardingStaffUid': profile.uid,
+        'activationDetails.onboardingStaffName': profile.name,
+        updatedAt: Timestamp.now()
+      });
+      alert("Outlet successfully activated!");
+    } catch (err) {
+      console.error("Finalization failed:", err);
+      alert("Failed to finalize onboarding.");
+    }
+  };
+
+  const handleDecline = async (id: string) => {
+    if (!profile) return;
+    try {
+      await updateDoc(doc(db, 'outlets', id), {
+        status: 'rejected',
+        'activationDetails.date': new Date().toISOString(),
+        'activationDetails.onboardingStaffUid': profile.uid,
+        'activationDetails.onboardingStaffName': profile.name,
+        updatedAt: Timestamp.now()
+      });
+      alert("Outlet application declined.");
+    } catch (err) {
+      console.error("Decline failed:", err);
+      alert("Failed to decline outlet.");
+    }
+  };
+
   useEffect(() => {
     if (!profile) return;
     const q = query(
