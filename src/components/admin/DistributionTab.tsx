@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Download, FileText, Store, Search, ChevronDown, Check, X, Users, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Download, FileText, Store, Search, Check, X, Users, Loader2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import type { Outlet } from '../../types';
 
@@ -346,3 +346,4 @@ export const DistributionTab: React.FC<DistributionTabProps> = ({
     )}
   </div>
 );
+};

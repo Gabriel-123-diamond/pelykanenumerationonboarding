@@ -9,7 +9,7 @@ import { Step1Profile } from './enumeration/Step1Profile';
 import { Step2Intelligence } from './enumeration/Step2Intelligence';
 import { Step3Evaluation } from './enumeration/Step3Evaluation';
 import { Step4Review } from './enumeration/Step4Review';
-import { cn } from '../lib/utils';
+import { cn, validatePhoneNumber } from '../lib/utils';
 
 const initialEvaluation: EvaluationMatrix = {
   footTraffic: 3, breadSalesVolume: 3, paymentReliability: 3, routeFit: 3,
