@@ -42,6 +42,7 @@ export const EnumerationDashboard: React.FC = () => {
   const [whatsappError, setWhatsappError] = useState<string | null>(null);
   const [history, setHistory] = useState<Outlet[]>([]);
   const [editingOutletId, setEditingOutletId] = useState<string | null>(null);
+  const [isCompressing, setIsCompressing] = useState(false);
 
   useEffect(() => {
     if (!profile) return;
@@ -83,20 +84,52 @@ export const EnumerationDashboard: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const validatePhoneNumber = (num: string): boolean => {
-    const cleanNum = num.replace(/[\s-]/g, '');
-    if (cleanNum.startsWith('0')) return /^\d{11}$/.test(cleanNum);
-    if (cleanNum.startsWith('+234')) return /^\+234\d{10}$/.test(cleanNum);
-    return false;
+  const validateStep1 = () => {
+    const required = ['name', 'address', 'town', 'gps', 'phone', 'ownerName'];
+    const missing = required.filter(key => !formData[key as keyof Outlet]);
+    
+    if (missing.length > 0) {
+      alert(`Required fields missing in Profile: ${missing.map(m => m.charAt(0).toUpperCase() + m.slice(1)).join(', ')}`);
+      return false;
+    }
+
+    if (!validatePhoneNumber(formData.phone || '')) { 
+      setPhoneError("Use format: 091... (11 digits) or +234..."); 
+      return false; 
+    }
+    
+    if (formData.whatsapp && !validatePhoneNumber(formData.whatsapp)) { 
+      setWhatsappError("Use format: 091... (11 digits) or +234..."); 
+      return false; 
+    }
+
+    return true;
+  };
+
+  const validateStep2 = () => {
+    if (!formData.interestedInVilla) {
+      alert("Please indicate interest in Meal Villa Bread.");
+      return false;
+    }
+    if (formData.interestedInVilla === 'Yes') {
+      if (!formData.expectedDailyQuantity) {
+        alert("Please specify expected daily quantity.");
+        return false;
+      }
+      if (!formData.preferredDeliveryTime) {
+        alert("Please specify preferred delivery time.");
+        return false;
+      }
+      if (!formData.preferredProducts || formData.preferredProducts.length === 0) {
+        alert("Please select at least one preferred product size.");
+        return false;
+      }
+    }
+    return true;
   };
 
   const calculateScore = () => {
     const total = Object.values(evaluation).reduce((a, b) => a + b, 0);
-    // 8 categories, 1=Best, 5=Bad. Total 8-40.
-    // A: 8-12 (Very High Performance)
-    // B: 13-20 (Stable/Good)
-    // C: 21-28 (Growth Potential)
-    // D: 29-40 (Low Viability)
     const recommendedClass: 'A' | 'B' | 'C' | 'D' | 'Watchlist' = 
       total <= 12 ? 'A' : 
       total <= 20 ? 'B' : 
@@ -107,12 +140,14 @@ export const EnumerationDashboard: React.FC = () => {
 
   const handleSubmit = async () => {
     if (!profile) return;
-    const isPhoneValid = validatePhoneNumber(formData.phone || '');
-    if (!isPhoneValid) { setPhoneError("Use format: 091... (11 digits) or +234..."); setStep(1); return; }
+    if (!validateStep1()) { setStep(1); return; }
+    if (!validateStep2()) { setStep(2); return; }
     
     setLoading(true);
     try {
       const { total, recommendedClass } = calculateScore();
+      
+      // Upload Photos with progress check
       const newPhotoUrls = await Promise.all(photos.map(async (file) => {
         const storageRef = ref(storage, `outlets/${Date.now()}_${file.name}`);
         const snapshot = await uploadBytes(storageRef, file);
@@ -141,26 +176,19 @@ export const EnumerationDashboard: React.FC = () => {
       };
 
       if (editingOutletId) {
-        // Double check ownership in UI before update (rules will also enforce this)
-        const outlet = history.find(o => o.id === editingOutletId);
-        if (outlet && outlet.fieldOfficerUid !== profile.uid) {
-           alert("Unauthorized: You can only edit your own captures.");
-           resetForm();
-           return;
-        }
         await updateDoc(doc(db, 'outlets', editingOutletId), payload);
-        alert("Outlet successfully updated!");
+        alert("Update Successful: Database synchronized.");
       } else {
         await addDoc(collection(db, 'outlets'), {
           ...payload,
           createdAt: Timestamp.now(),
         });
-        alert("Outlet successfully enumerated!");
+        alert("Capture Successful: Market data transmitted.");
       }
       resetForm();
-    } catch (err) { 
+    } catch (err: any) { 
       console.error(err);
-      alert("Failed to save outlet data."); 
+      alert(`Submission Error: ${err.message || 'Check your connection and try again.'}`); 
     } finally { 
       setLoading(false); 
     }
@@ -233,7 +261,7 @@ export const EnumerationDashboard: React.FC = () => {
 
         {activeTab === 'new' ? (
           <>
-            {step === 1 && <Step1Profile formData={formData} setFormData={setFormData} photos={photos} setPhotos={setPhotos} phoneError={phoneError} setPhoneError={setPhoneError} whatsappError={whatsappError} setWhatsappError={setWhatsappError} />}
+            {step === 1 && <Step1Profile formData={formData} setFormData={setFormData} photos={photos} setPhotos={setPhotos} phoneError={phoneError} setPhoneError={setPhoneError} whatsappError={whatsappError} setWhatsappError={setWhatsappError} setIsCompressing={setIsCompressing} />}
             {step === 2 && <Step2Intelligence formData={formData} setFormData={setFormData} />}
             {step === 3 && <Step3Evaluation evaluation={evaluation} setEvaluation={setEvaluation} initialEvaluation={initialEvaluation} />}
             {step === 4 && (() => {
@@ -260,8 +288,11 @@ export const EnumerationDashboard: React.FC = () => {
               <button 
                 onClick={() => {
                   if (step === 1) {
-                    if (!validatePhoneNumber(formData.phone || '')) { setPhoneError("Use format: 091... (11 digits) or +234..."); return; }
-                    if (formData.whatsapp && !validatePhoneNumber(formData.whatsapp)) { setWhatsappError("Use format: 091... (11 digits) or +234..."); return; }
+                    if (isCompressing) {
+                      alert("Please wait for images to finish optimizing.");
+                      return;
+                    }
+                    if (!validateStep1()) return;
                   }
                   if (step === 4) {
                     handleSubmit();
@@ -270,10 +301,10 @@ export const EnumerationDashboard: React.FC = () => {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }
                 }} 
-                disabled={loading} 
+                disabled={loading || (step === 1 && isCompressing)} 
                 className="bg-stone-950 text-white px-5 sm:px-10 py-4 rounded-2xl font-black uppercase tracking-[0.14em] sm:tracking-[0.2em] text-[10px] shadow-2xl shadow-black/20 active:scale-95 disabled:opacity-30 transition-all hover:bg-amber-600"
               >
-                {step === 4 ? (loading ? "Saving..." : "Submit Review") : "Continue"}
+                {step === 4 ? (loading ? "Saving..." : "Submit Review") : (isCompressing ? "Optimizing..." : "Continue")}
               </button>
             </div>
           </>

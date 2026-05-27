@@ -13,6 +13,7 @@ interface Step1Props {
   setPhoneError: (err: string | null) => void;
   whatsappError: string | null;
   setWhatsappError: (err: string | null) => void;
+  setIsCompressing: (val: boolean) => void;
 }
 
 const TimeSelect = ({ label, value, onChange }: { label: string, value: string, onChange: (val: string) => void }) => {
@@ -45,13 +46,17 @@ const TimeSelect = ({ label, value, onChange }: { label: string, value: string, 
 };
 
 export const Step1Profile: React.FC<Step1Props> = ({
-  formData, setFormData, photos, setPhotos, phoneError, setPhoneError, whatsappError, setWhatsappError
+  formData, setFormData, photos, setPhotos, phoneError, setPhoneError, whatsappError, setWhatsappError, setIsCompressing: setParentIsCompressing
 }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [isCompressing, setIsCompressing] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    setParentIsCompressing(isCompressing);
+  }, [isCompressing, setParentIsCompressing]);
 
   const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {

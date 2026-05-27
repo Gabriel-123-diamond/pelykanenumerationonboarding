@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Store, MapPin, Calendar, CheckCircle2, X, XCircle } from 'lucide-react';
+import { Store, MapPin, Calendar, CheckCircle2, X, XCircle, Loader2 } from 'lucide-react';
 import type { Outlet } from '../../types';
 import { Verification } from '../Verification';
 import { cn } from '../../lib/utils';
@@ -9,16 +9,17 @@ interface OnboardingCardProps {
   onUpdate: (id: string, data: any) => void;
   onFinalize: (id: string) => void;
   onDecline?: (id: string) => void;
+  isProcessing?: boolean;
 }
 
-export const OnboardingCard: React.FC<OnboardingCardProps> = ({ outlet, onUpdate, onFinalize, onDecline }) => {
+export const OnboardingCard: React.FC<OnboardingCardProps> = ({ outlet, onUpdate, onFinalize, onDecline, isProcessing }) => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const isFormComplete = () => {
     const checklist = outlet.onboardingChecklist;
     const isChecklistComplete = checklist && 
       Object.values(checklist).every(val => val === true) && 
-      Object.keys(checklist).length === 13;
+      Object.keys(checklist).length >= 13;
     
     return !!(
       isChecklistComplete &&
@@ -63,7 +64,7 @@ export const OnboardingCard: React.FC<OnboardingCardProps> = ({ outlet, onUpdate
                   key={`${url}-${index}`}
                   type="button"
                   onClick={() => setPreviewImage(url)}
-                  className="aspect-square overflow-hidden rounded-2xl border border-stone-100 bg-stone-50 shadow-inner"
+                  className="aspect-square overflow-hidden rounded-2xl border border-stone-100 bg-stone-50 shadow-inner active:scale-95 transition-transform"
                 >
                   <img src={url} className="h-full w-full object-cover transition-transform hover:scale-105" alt={`Outlet evidence ${index + 1}`} />
                 </button>
@@ -166,7 +167,7 @@ export const OnboardingCard: React.FC<OnboardingCardProps> = ({ outlet, onUpdate
             </div>
           </div>
 
-          <div className="flex items-center justify-between gap-4 p-4 sm:p-6 bg-stone-50 rounded-[2rem] border border-stone-100 group cursor-pointer" onClick={() => onUpdate(outlet.id, { physicalDocumentSigned: !outlet.physicalDocumentSigned })}>
+          <div className="flex items-center justify-between gap-4 p-4 sm:p-6 bg-stone-50 rounded-[2rem] border border-stone-100 group cursor-pointer active:scale-95 transition-all" onClick={() => onUpdate(outlet.id, { physicalDocumentSigned: !outlet.physicalDocumentSigned })}>
             <div className="flex items-center gap-4">
               <div className={cn(
                 "w-10 h-10 rounded-xl flex items-center justify-center transition-colors",
@@ -201,22 +202,20 @@ export const OnboardingCard: React.FC<OnboardingCardProps> = ({ outlet, onUpdate
           <div className="mt-10 space-y-4">
             <button 
               onClick={() => onFinalize(outlet.id)} 
-              disabled={!isFormComplete()}
+              disabled={!isFormComplete() || isProcessing}
               className="w-full bg-stone-950 hover:bg-amber-600 text-white py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] transition-all shadow-xl active:scale-95 flex items-center justify-center gap-3 relative z-10 disabled:opacity-30 disabled:hover:bg-stone-950 disabled:cursor-not-allowed"
             >
-              <CheckCircle2 size={16} />
-              {isFormComplete() ? "Activate Customer" : "Fill all fields to Activate"}
+              {isProcessing ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+              {isProcessing ? "Processing..." : isFormComplete() ? "Activate Customer" : "Fill all fields to Activate"}
             </button>
             {onDecline && (
               <button 
-                onClick={() => {
-                  if (window.confirm("Are you sure you want to decline this customer? This action cannot be undone.")) {
-                    onDecline(outlet.id);
-                  }
-                }}
-                className="w-full bg-white hover:bg-red-50 text-red-500 border border-red-100 hover:border-red-200 py-4 rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] transition-all active:scale-95 flex items-center justify-center gap-3 relative z-10"
+                onClick={() => onDecline(outlet.id)}
+                disabled={isProcessing}
+                className="w-full bg-white hover:bg-red-50 text-red-500 border border-red-100 hover:border-red-200 py-4 rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] transition-all active:scale-95 flex items-center justify-center gap-3 relative z-10 disabled:opacity-50"
               >
-                <XCircle size={16} /> Decline Customer
+                {isProcessing ? <Loader2 size={16} className="animate-spin" /> : <XCircle size={16} />}
+                {isProcessing ? "Processing..." : "Decline Customer"}
               </button>
             )}
           </div>

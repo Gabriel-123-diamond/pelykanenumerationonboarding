@@ -14,12 +14,16 @@ export const OnboardingDashboard: React.FC = () => {
   const [history, setHistory] = useState<Outlet[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOutletId, setSelectedOutletId] = useState<string>('');
+  const [processingId, setProcessingId] = useState<string | null>(null);
 
   useEffect(() => {
     const q = query(collection(db, 'outlets'), where('status', '==', 'pending_onboarding'));
     const unsubscribeQueue = onSnapshot(q, (snapshot) => {
       const pendingOutlets = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Outlet[];
       setOutlets(pendingOutlets);
+      setLoading(false);
+    }, (err) => {
+      console.error("Queue load error:", err);
       setLoading(false);
     });
 
@@ -34,13 +38,27 @@ export const OnboardingDashboard: React.FC = () => {
         ...data,
         updatedAt: Timestamp.now()
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error("Update failed:", err);
+      alert(`Update Failed: ${err.message || 'Check connection.'}`);
     }
   };
 
   const handleFinalize = async (id: string) => {
     if (!profile) return;
+    const outlet = outlets.find(o => o.id === id);
+    if (!outlet) return;
+
+    // Check if all items in onboardingChecklist are true
+    const checklist = outlet.onboardingChecklist;
+    const incomplete = checklist ? Object.entries(checklist).filter(([_, val]) => !val) : [];
+    
+    if (incomplete.length > 0) {
+      alert(`Incomplete Checklist: Please verify all ${incomplete.length} remaining items before activation.`);
+      return;
+    }
+
+    setProcessingId(id);
     try {
       await updateDoc(doc(db, 'outlets', id), {
         status: 'active_customer',
@@ -49,15 +67,21 @@ export const OnboardingDashboard: React.FC = () => {
         'activationDetails.onboardingStaffName': profile.name,
         updatedAt: Timestamp.now()
       });
-      alert("Outlet successfully activated!");
-    } catch (err) {
+      alert("Success: Outlet moved to Active Pipeline.");
+      setSelectedOutletId('');
+    } catch (err: any) {
       console.error("Finalization failed:", err);
-      alert("Failed to finalize onboarding.");
+      alert(`Activation Error: ${err.message}`);
+    } finally {
+      setProcessingId(null);
     }
   };
 
   const handleDecline = async (id: string) => {
     if (!profile) return;
+    if (!window.confirm("Are you sure you want to DECLINE this outlet? This will move it to rejected history.")) return;
+    
+    setProcessingId(id);
     try {
       await updateDoc(doc(db, 'outlets', id), {
         status: 'rejected',
@@ -66,10 +90,13 @@ export const OnboardingDashboard: React.FC = () => {
         'activationDetails.onboardingStaffName': profile.name,
         updatedAt: Timestamp.now()
       });
-      alert("Outlet application declined.");
-    } catch (err) {
+      alert("Protocol Terminated: Outlet declined.");
+      setSelectedOutletId('');
+    } catch (err: any) {
       console.error("Decline failed:", err);
-      alert("Failed to decline outlet.");
+      alert(`Operation Failed: ${err.message}`);
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -211,14 +238,9 @@ export const OnboardingDashboard: React.FC = () => {
                     key={selectedOutlet.id} 
                     outlet={selectedOutlet} 
                     onUpdate={handleUpdateOutlet} 
-                    onFinalize={(id) => {
-                      handleFinalize(id);
-                      setSelectedOutletId('');
-                    }}
-                    onDecline={(id) => {
-                      handleDecline(id);
-                      setSelectedOutletId('');
-                    }}
+                    onFinalize={handleFinalize}
+                    onDecline={handleDecline}
+                    isProcessing={processingId === selectedOutlet.id}
                   />
                 ) : (
                   <div className="bg-amber-50/50 border-2 border-dashed border-amber-100 rounded-[2rem] sm:rounded-[3rem] p-8 sm:p-20 text-center animate-pulse">

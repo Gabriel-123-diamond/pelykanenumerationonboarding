@@ -23,6 +23,9 @@ export const AdminDashboard: React.FC = () => {
   const [staffFilter, setStaffFilter] = useState('');
   const [staffRoleFilter, setStaffRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [isExportingCsv, setIsExportingCsv] = useState(false);
+  const [isExportingWord, setIsExportingWord] = useState(false);
+  const [pageSize, setPageSize] = useState(25);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(query(collection(db, 'outlets'), orderBy('createdAt', 'desc')), 
@@ -32,6 +35,30 @@ export const AdminDashboard: React.FC = () => {
       (snap) => setUsers(snap.docs.map(d => ({ uid: d.id, ...d.data() })) as UserProfile[]));
     return () => { unsubscribe(); userUnsubscribe(); };
   }, []);
+
+  const handleExportCsv = async () => {
+    setIsExportingCsv(true);
+    try { await exportOutletsCsv(filteredOutlets, 'outlet-export'); }
+    finally { setIsExportingCsv(false); }
+  };
+
+  const handleExportWord = async () => {
+    setIsExportingWord(true);
+    try { await exportOutletsWord(filteredOutlets, 'outlet-export'); }
+    finally { setIsExportingWord(false); }
+  };
+
+  const handleStaffExportCsv = async () => {
+    setIsExportingCsv(true);
+    try { await exportStaffCsv(filteredStaff, getStaffMetrics, 'staff-export'); }
+    finally { setIsExportingCsv(false); }
+  };
+
+  const handleStaffExportWord = async () => {
+    setIsExportingWord(true);
+    try { await exportStaffWord(filteredStaff, getStaffMetrics, 'staff-export'); }
+    finally { setIsExportingWord(false); }
+  };
 
   const handleApproveUser = async (uid: string) => {
     try { await updateDoc(doc(db, 'users', uid), { isApproved: true, updatedAt: new Date().toISOString() }); }
@@ -58,7 +85,7 @@ export const AdminDashboard: React.FC = () => {
   const pendingUsers = users.filter(u => !u.isApproved);
   const approvedUsers = users.filter(u => u.isApproved && u.role !== 'admin');
   
-  const filteredOutlets = outlets.filter(o => {
+  const allFilteredOutlets = outlets.filter(o => {
     const matchesSearch = o.name.toLowerCase().includes(outletFilter.toLowerCase()) || o.town.toLowerCase().includes(outletFilter.toLowerCase());
     const matchesStatus = statusFilter === 'all' || o.status === statusFilter;
     const matchesAgent = agentFilter === 'all' || o.fieldOfficerName === agentFilter;
@@ -82,6 +109,8 @@ export const AdminDashboard: React.FC = () => {
 
     return matchesSearch && matchesStatus && matchesAgent && matchesDate;
   });
+
+  const filteredOutlets = allFilteredOutlets.slice(0, pageSize);
 
   const filteredStaff = approvedUsers.filter(u => 
     (u.name.toLowerCase().includes(staffFilter.toLowerCase()) || u.email.toLowerCase().includes(staffFilter.toLowerCase())) &&
@@ -118,10 +147,10 @@ export const AdminDashboard: React.FC = () => {
             </div>
           </div>
           <div className="grid grid-cols-2 sm:flex gap-3 sm:gap-4 w-full md:w-auto">
-            <button onClick={() => setActiveTab('staff')} className={cn("px-4 sm:px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-tight sm:tracking-widest transition-all flex items-center justify-center gap-2 sm:gap-3 border shadow-lg", activeTab === 'staff' ? "bg-amber-600 text-white border-amber-500" : "bg-stone-900 text-stone-400 border-stone-800")}>
+            <button onClick={() => setActiveTab('staff')} className={cn("px-4 sm:px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-tight sm:tracking-widest transition-all flex items-center justify-center gap-2 sm:gap-3 border shadow-lg active:scale-95", activeTab === 'staff' ? "bg-amber-600 text-white border-amber-50" : "bg-stone-900 text-stone-400 border-stone-800")}>
               <Users size={16} /> Staff Desk {stats.pendingStaff > 0 && <span className="bg-white text-amber-600 px-2 py-0.5 rounded-full animate-bounce">{stats.pendingStaff}</span>}
             </button>
-            <button onClick={() => setActiveTab('outlets')} className={cn("px-4 sm:px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-tight sm:tracking-widest transition-all flex items-center justify-center gap-2 sm:gap-3 border shadow-lg", activeTab === 'outlets' ? "bg-amber-600 text-white border-amber-500" : "bg-stone-900 text-stone-400 border-stone-800")}>
+            <button onClick={() => setActiveTab('outlets')} className={cn("px-4 sm:px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-tight sm:tracking-widest transition-all flex items-center justify-center gap-2 sm:gap-3 border shadow-lg active:scale-95", activeTab === 'outlets' ? "bg-amber-600 text-white border-amber-50" : "bg-stone-900 text-stone-400 border-stone-800")}>
               Distribution {stats.pending > 0 && <span className="bg-white text-amber-600 px-2 py-0.5 rounded-full animate-bounce">{stats.pending}</span>}
             </button>
           </div>
@@ -160,8 +189,12 @@ export const AdminDashboard: React.FC = () => {
             setEndDate={setEndDate}
             agents={uniqueAgents}
             setSelectedOutlet={setSelectedOutlet}
-            onExportCsv={() => exportOutletsCsv(filteredOutlets, 'outlet-export')}
-            onExportWord={() => exportOutletsWord(filteredOutlets, 'outlet-export')}
+            onExportCsv={handleExportCsv}
+            onExportWord={handleExportWord}
+            isExportingCsv={isExportingCsv}
+            isExportingWord={isExportingWord}
+            onLoadMore={() => setPageSize(prev => prev + 25)}
+            hasMore={allFilteredOutlets.length > pageSize}
           /> :
           <StaffDeskTab 
             pendingUsers={pendingUsers} 
@@ -173,8 +206,10 @@ export const AdminDashboard: React.FC = () => {
             totalStaff={stats.totalStaff} 
             handleApproveUser={handleApproveUser} 
             getStaffMetrics={getStaffMetrics} 
-            onExportCsv={() => exportStaffCsv(filteredStaff, getStaffMetrics, 'staff-export')}
-            onExportWord={() => exportStaffWord(filteredStaff, getStaffMetrics, 'staff-export')}
+            onExportCsv={handleStaffExportCsv}
+            onExportWord={handleStaffExportWord}
+            isExportingCsv={isExportingCsv}
+            isExportingWord={isExportingWord}
           />
         }
       </main>

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Download, FileText, Store, Search, ChevronDown, Check, X, Users } from 'lucide-react';
+import { Download, FileText, Store, Search, ChevronDown, Check, X, Users, Loader2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import type { Outlet } from '../../types';
 
@@ -19,10 +19,14 @@ interface DistributionTabProps {
   setSelectedOutlet: (outlet: Outlet) => void;
   onExportCsv: () => void;
   onExportWord: () => void;
+  isExportingCsv?: boolean;
+  isExportingWord?: boolean;
+  onLoadMore?: () => void;
+  hasMore?: boolean;
 }
 
 export const DistributionTab: React.FC<DistributionTabProps> = ({
-  outlets, filter, setFilter, statusFilter, setStatusFilter, agentFilter, setAgentFilter, startDate, setStartDate, endDate, setEndDate, agents, setSelectedOutlet, onExportCsv, onExportWord
+  outlets, filter, setFilter, statusFilter, setStatusFilter, agentFilter, setAgentFilter, startDate, setStartDate, endDate, setEndDate, agents, setSelectedOutlet, onExportCsv, onExportWord, isExportingCsv, isExportingWord, onLoadMore, hasMore
 }) => {
   const [isAgentDialogOpen, setIsAgentDialogOpen] = useState(false);
   const [agentSearchQuery, setAgentSearchQuery] = useState('');
@@ -54,18 +58,31 @@ export const DistributionTab: React.FC<DistributionTabProps> = ({
             <p className="text-stone-400 text-xs font-bold uppercase tracking-widest mt-1">Real-time market synchronization</p>
           </div>
           <div className="flex flex-wrap gap-3">
-            <button onClick={onExportCsv} className="bg-stone-900 text-white text-[10px] font-black px-4 py-2 rounded-xl uppercase flex items-center gap-2 shadow-lg border border-stone-800 hover:bg-amber-600 transition-colors leading-tight">
-              <Download size={14} /> Excel or Google Sheets
+            <button 
+              onClick={onExportCsv} 
+              disabled={isExportingCsv}
+              className="bg-stone-900 text-white text-[10px] font-black px-4 py-2 rounded-xl uppercase flex items-center gap-2 shadow-lg border border-stone-800 hover:bg-amber-600 transition-all leading-tight disabled:opacity-50 active:scale-95"
+            >
+              {isExportingCsv ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+              {isExportingCsv ? "Generating..." : "Excel or Google Sheets"}
             </button>
-            <button onClick={onExportWord} className="bg-white text-stone-700 text-[10px] font-black px-4 py-2 rounded-xl uppercase flex items-center gap-2 shadow-sm border border-amber-100 hover:border-amber-300 transition-colors leading-tight">
-              <FileText size={14} /> Word or Google Docs
+            <button 
+              onClick={onExportWord} 
+              disabled={isExportingWord}
+              className="bg-white text-stone-700 text-[10px] font-black px-4 py-2 rounded-xl uppercase flex items-center gap-2 shadow-sm border border-amber-100 hover:border-amber-300 transition-all leading-tight disabled:opacity-50 active:scale-95"
+            >
+              {isExportingWord ? <Loader2 size={14} className="animate-spin text-amber-600" /> : <FileText size={14} />}
+              {isExportingWord ? "Generating..." : "Word or Google Docs"}
             </button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
           <div className="space-y-1.5">
-            <label className="text-[8px] font-black text-stone-400 uppercase tracking-widest ml-1">Search Outlets</label>
+            <label className="text-[8px] font-black text-stone-400 uppercase tracking-widest ml-1 flex justify-between">
+              Search Outlets
+              {filter && <button onClick={() => setFilter('')} className="text-amber-600 hover:text-stone-950">Clear</button>}
+            </label>
             <input 
               type="text" placeholder="Name or Town..." value={filter}
               onChange={(e) => setFilter(e.target.value)}
@@ -76,7 +93,7 @@ export const DistributionTab: React.FC<DistributionTabProps> = ({
             <label className="text-[8px] font-black text-stone-400 uppercase tracking-widest ml-1">Status</label>
             <select 
               value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-white border border-amber-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest outline-none shadow-sm w-full"
+              className="bg-white border border-amber-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest outline-none shadow-sm w-full cursor-pointer"
             >
               <option value="all">All Status</option>
               <option value="enumerated">Enumerated</option>
@@ -88,7 +105,7 @@ export const DistributionTab: React.FC<DistributionTabProps> = ({
             <label className="text-[8px] font-black text-stone-400 uppercase tracking-widest ml-1">Field Agent</label>
             <button
               onClick={() => setIsAgentDialogOpen(true)}
-              className="bg-white border border-amber-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest outline-none shadow-sm w-full flex items-center justify-between text-left h-[38px] hover:border-amber-400 transition-colors"
+              className="bg-white border border-amber-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest outline-none shadow-sm w-full flex items-center justify-between text-left h-[38px] hover:border-amber-400 transition-all active:scale-95"
             >
               <span className="truncate">{agentFilter === 'all' ? 'All Agents' : agentFilter}</span>
               <div className="flex items-center gap-2">
@@ -116,7 +133,7 @@ export const DistributionTab: React.FC<DistributionTabProps> = ({
                     </div>
                     <button 
                       onClick={() => setIsAgentDialogOpen(false)} 
-                      className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-stone-400 hover:text-stone-950 hover:bg-stone-100 transition-all shadow-sm border border-stone-100"
+                      className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-stone-400 hover:text-stone-950 hover:bg-stone-100 transition-all shadow-sm border border-stone-100 active:scale-90"
                     >
                       <X size={20} />
                     </button>
@@ -137,7 +154,7 @@ export const DistributionTab: React.FC<DistributionTabProps> = ({
                       {agentSearchQuery && (
                         <button 
                           onClick={() => setAgentSearchQuery('')}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-amber-600 transition-colors"
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-amber-600 transition-all active:scale-90"
                         >
                           <X size={14} />
                         </button>
@@ -150,7 +167,7 @@ export const DistributionTab: React.FC<DistributionTabProps> = ({
                       {agentFilter !== 'all' && (
                         <button 
                           onClick={() => { setAgentFilter('all'); setIsAgentDialogOpen(false); }}
-                          className="text-[8px] font-black text-amber-600 uppercase tracking-widest hover:underline"
+                          className="text-[8px] font-black text-amber-600 uppercase tracking-widest hover:underline active:scale-95"
                         >
                           Reset Filter
                         </button>
@@ -164,7 +181,7 @@ export const DistributionTab: React.FC<DistributionTabProps> = ({
                       <button
                         onClick={() => { setAgentFilter('all'); setIsAgentDialogOpen(false); setAgentSearchQuery(''); }}
                         className={cn(
-                          "w-full text-left px-6 py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-between group transition-all duration-300",
+                          "w-full text-left px-6 py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-between group transition-all duration-300 active:scale-[0.98]",
                           agentFilter === 'all' ? "bg-amber-600 text-white shadow-lg shadow-amber-900/20" : "bg-stone-50 text-stone-600 border border-transparent hover:border-amber-400 hover:bg-amber-50"
                         )}
                       >
@@ -182,7 +199,7 @@ export const DistributionTab: React.FC<DistributionTabProps> = ({
                           key={agent}
                           onClick={() => { setAgentFilter(agent); setIsAgentDialogOpen(false); setAgentSearchQuery(''); }}
                           className={cn(
-                            "w-full text-left px-6 py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-between group transition-all duration-300",
+                            "w-full text-left px-6 py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-between group transition-all duration-300 active:scale-[0.98]",
                             agentFilter === agent ? "bg-stone-950 text-white shadow-xl" : "bg-stone-50 text-stone-600 border border-transparent hover:border-amber-400 hover:bg-amber-50"
                           )}
                         >
@@ -202,7 +219,7 @@ export const DistributionTab: React.FC<DistributionTabProps> = ({
                           <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest">No matching agents found</p>
                           <button 
                             onClick={() => setAgentSearchQuery('')}
-                            className="mt-4 text-[9px] font-black text-amber-600 uppercase tracking-widest hover:underline"
+                            className="mt-4 text-[9px] font-black text-amber-600 uppercase tracking-widest hover:underline active:scale-95"
                           >
                             Clear search query
                           </button>
@@ -225,19 +242,25 @@ export const DistributionTab: React.FC<DistributionTabProps> = ({
             )}
           </div>
           <div className="space-y-1.5">
-            <label className="text-[8px] font-black text-stone-400 uppercase tracking-widest ml-1">Start Date</label>
+            <label className="text-[8px] font-black text-stone-400 uppercase tracking-widest ml-1 flex justify-between">
+              Start Date
+              {startDate && <button onClick={() => setStartDate('')} className="text-amber-600 hover:text-stone-950">Clear</button>}
+            </label>
             <input 
               type="date" value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="bg-white border border-amber-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest focus:ring-2 focus:ring-amber-500 outline-none w-full shadow-sm"
+              className="bg-white border border-amber-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest focus:ring-2 focus:ring-amber-500 outline-none w-full shadow-sm cursor-pointer"
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-[8px] font-black text-stone-400 uppercase tracking-widest ml-1">End Date</label>
+            <label className="text-[8px] font-black text-stone-400 uppercase tracking-widest ml-1 flex justify-between">
+              End Date
+              {endDate && <button onClick={() => setEndDate('')} className="text-amber-600 hover:text-stone-950">Clear</button>}
+            </label>
             <input 
               type="date" value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="bg-white border border-amber-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest focus:ring-2 focus:ring-amber-500 outline-none w-full shadow-sm"
+              className="bg-white border border-amber-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest focus:ring-2 focus:ring-amber-500 outline-none w-full shadow-sm cursor-pointer"
             />
           </div>
         </div>
@@ -279,7 +302,7 @@ export const DistributionTab: React.FC<DistributionTabProps> = ({
                 </td>
                 <td className="p-6">
                   <span className={cn(
-                    "text-[9px] font-black px-3 py-1 rounded-lg uppercase tracking-tighter border",
+                    "text-[9px] font-black px-3 py-1 rounded-lg uppercase tracking-tighter italic border",
                     outlet.interestedInVilla === 'Yes' ? "bg-amber-50 text-amber-700 border-amber-200" :
                     outlet.interestedInVilla === 'Maybe' ? "bg-orange-50 text-orange-700 border-orange-100" :
                     "bg-stone-50 text-stone-400 border-stone-100"
@@ -301,8 +324,8 @@ export const DistributionTab: React.FC<DistributionTabProps> = ({
                 <td className="p-6 text-[11px] text-stone-400 font-bold">
                   {outlet.updatedAt?.toDate?.() ? outlet.updatedAt.toDate().toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }) : '---'}
                 </td>
-                <td className="p-6">
-                  <button onClick={() => setSelectedOutlet(outlet)} className="text-amber-600 font-black text-[10px] uppercase tracking-widest hover:text-stone-950 transition-colors underline underline-offset-4">Open File</button>
+                <td className="p-6 text-right">
+                  <button onClick={() => setSelectedOutlet(outlet)} className="text-amber-600 font-black text-[10px] uppercase tracking-widest hover:text-stone-950 transition-all underline underline-offset-4 active:scale-95">Open File</button>
                 </td>
               </tr>
             ))
@@ -310,5 +333,16 @@ export const DistributionTab: React.FC<DistributionTabProps> = ({
         </tbody>
       </table>
     </div>
+    
+    {hasMore && (
+      <div className="p-10 border-t border-amber-50 bg-stone-50/20 text-center">
+        <button 
+          onClick={onLoadMore}
+          className="bg-white text-stone-950 border border-stone-200 px-8 py-4 rounded-[2rem] text-[10px] font-black uppercase tracking-[0.2em] shadow-lg hover:border-amber-400 hover:text-amber-600 transition-all active:scale-95"
+        >
+          Load More Results
+        </button>
+      </div>
+    )}
   </div>
 );

@@ -40,19 +40,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (firebaseUser) {
-        // Special Case: System Admin via Master Key
-        if (firebaseUser.email === 'admin@mealvilla.com') {
-          setProfile({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            name: 'System Admin',
-            role: 'admin',
-            isApproved: true
-          });
-          setLoading(false);
-          return;
-        }
-
         const docRef = doc(db, 'users', firebaseUser.uid);
         profileUnsubscribe = onSnapshot(docRef, 
           (docSnap) => {
@@ -81,7 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  const isAdmin = user?.email === 'admin@mealvilla.com' || profile?.role === 'admin';
+  const isAdmin = profile?.role === 'admin';
 
   return (
     <AuthContext.Provider value={{ 

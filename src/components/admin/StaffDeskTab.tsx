@@ -1,5 +1,5 @@
 import React from 'react';
-import { Download, FileText, Users, ShieldCheck } from 'lucide-react';
+import { Download, FileText, Users, ShieldCheck, Loader2 } from 'lucide-react';
 import type { UserProfile } from '../../types';
 
 interface StaffDeskTabProps {
@@ -14,10 +14,12 @@ interface StaffDeskTabProps {
   getStaffMetrics: (staff: UserProfile) => { count: number, active: number, pending: number };
   onExportCsv: () => void;
   onExportWord: () => void;
+  isExportingCsv?: boolean;
+  isExportingWord?: boolean;
 }
 
 export const StaffDeskTab: React.FC<StaffDeskTabProps> = ({
-  pendingUsers, filteredStaff, staffFilter, setStaffFilter, staffRoleFilter, setStaffRoleFilter, totalStaff, handleApproveUser, getStaffMetrics, onExportCsv, onExportWord
+  pendingUsers, filteredStaff, staffFilter, setStaffFilter, staffRoleFilter, setStaffRoleFilter, totalStaff, handleApproveUser, getStaffMetrics, onExportCsv, onExportWord, isExportingCsv, isExportingWord
 }) => (
   <div className="space-y-12 animate-in slide-in-from-bottom-6 duration-700">
     {pendingUsers.length > 0 && (
@@ -72,11 +74,21 @@ export const StaffDeskTab: React.FC<StaffDeskTabProps> = ({
             <option value="onboarding">Onboarding</option>
           </select>
           <div className="bg-stone-900 text-amber-500 text-[10px] font-black px-4 py-2 rounded-xl uppercase shadow-lg border border-stone-800">{totalStaff} Total Staff</div>
-          <button onClick={onExportCsv} className="bg-stone-900 text-white text-[10px] font-black px-4 py-2 rounded-xl uppercase flex items-center gap-2 shadow-lg border border-stone-800 hover:bg-amber-600 transition-colors leading-tight">
-            <Download size={14} /> Excel or Google Sheets
+          <button 
+            onClick={onExportCsv} 
+            disabled={isExportingCsv}
+            className="bg-stone-900 text-white text-[10px] font-black px-4 py-2 rounded-xl uppercase flex items-center gap-2 shadow-lg border border-stone-800 hover:bg-amber-600 transition-colors leading-tight disabled:opacity-50"
+          >
+            {isExportingCsv ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+            {isExportingCsv ? "Generating..." : "Excel or Google Sheets"}
           </button>
-          <button onClick={onExportWord} className="bg-white text-stone-700 text-[10px] font-black px-4 py-2 rounded-xl uppercase flex items-center gap-2 shadow-sm border border-amber-100 hover:border-amber-300 transition-colors leading-tight">
-            <FileText size={14} /> Word or Google Docs
+          <button 
+            onClick={onExportWord} 
+            disabled={isExportingWord}
+            className="bg-white text-stone-700 text-[10px] font-black px-4 py-2 rounded-xl uppercase flex items-center gap-2 shadow-sm border border-amber-100 hover:border-amber-300 transition-colors leading-tight disabled:opacity-50"
+          >
+            {isExportingWord ? <Loader2 size={14} className="animate-spin text-amber-600" /> : <FileText size={14} />}
+            {isExportingWord ? "Generating..." : "Word or Google Docs"}
           </button>
         </div>
       </div>
