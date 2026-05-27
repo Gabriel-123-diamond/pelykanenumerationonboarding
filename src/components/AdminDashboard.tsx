@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../lib/firebase';
 import { collection, query, onSnapshot, orderBy, doc, updateDoc } from 'firebase/firestore';
 import type { Outlet, UserProfile } from '../types';
-import { LayoutDashboard, Store, CheckCircle, Clock, AlertTriangle, Users } from 'lucide-react';
+import { LayoutDashboard, Store, CheckCircle, Clock, AlertTriangle, Users, Edit3, UserCheck } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { OutletDetailModal } from './OutletDetailModal';
 import { MetricCard } from './admin/MetricCard';
@@ -64,7 +64,9 @@ export const AdminDashboard: React.FC = () => {
     total: outlets.length, active: outlets.filter(o => o.status === 'active_customer').length,
     pending: outlets.filter(o => o.status === 'pending_onboarding').length,
     enumerated: outlets.filter(o => o.status === 'enumerated').length,
-    pendingStaff: pendingUsers.length, totalStaff: approvedUsers.length
+    pendingStaff: pendingUsers.length, totalStaff: approvedUsers.length,
+    enumerationStaff: approvedUsers.filter(u => u.role === 'enumeration').length,
+    onboardingStaff: approvedUsers.filter(u => u.role === 'onboarding').length
   };
 
   if (loading) return (
@@ -89,16 +91,29 @@ export const AdminDashboard: React.FC = () => {
             <button onClick={() => setActiveTab('staff')} className={cn("px-4 sm:px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-tight sm:tracking-widest transition-all flex items-center justify-center gap-2 sm:gap-3 border shadow-lg", activeTab === 'staff' ? "bg-amber-600 text-white border-amber-500" : "bg-stone-900 text-stone-400 border-stone-800")}>
               <Users size={16} /> Staff Desk {stats.pendingStaff > 0 && <span className="bg-white text-amber-600 px-2 py-0.5 rounded-full animate-bounce">{stats.pendingStaff}</span>}
             </button>
-            <button onClick={() => setActiveTab('outlets')} className={cn("px-4 sm:px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-tight sm:tracking-widest transition-all border shadow-lg", activeTab === 'outlets' ? "bg-amber-600 text-white border-amber-500" : "bg-stone-900 text-stone-400 border-stone-800")}>Distribution</button>
+            <button onClick={() => setActiveTab('outlets')} className={cn("px-4 sm:px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-tight sm:tracking-widest transition-all flex items-center justify-center gap-2 sm:gap-3 border shadow-lg", activeTab === 'outlets' ? "bg-amber-600 text-white border-amber-500" : "bg-stone-900 text-stone-400 border-stone-800")}>
+              Distribution {stats.pending > 0 && <span className="bg-white text-amber-600 px-2 py-0.5 rounded-full animate-bounce">{stats.pending}</span>}
+            </button>
           </div>
         </div>
       </header>
       <main className="max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-8 mb-8 sm:mb-12">
-          <MetricCard label="Total Outlets" value={stats.total} icon={Store} color="text-amber-700" bg="bg-amber-50" />
-          <MetricCard label="Active Pipeline" value={stats.active} icon={CheckCircle} color="text-stone-700" bg="bg-stone-100" />
-          <MetricCard label="Pending Review" value={stats.pending} icon={Clock} color="text-amber-800" bg="bg-orange-50" />
-          <MetricCard label="New Lead" value={stats.enumerated} icon={AlertTriangle} color="text-stone-500" bg="bg-stone-50" />
+          {activeTab === 'outlets' ? (
+            <>
+              <MetricCard label="Total Outlets" value={stats.total} icon={Store} color="text-amber-700" bg="bg-amber-50" />
+              <MetricCard label="Active Pipeline" value={stats.active} icon={CheckCircle} color="text-stone-700" bg="bg-stone-100" />
+              <MetricCard label="Pending Review" value={stats.pending} icon={Clock} color="text-amber-800" bg="bg-orange-50" />
+              <MetricCard label="New Lead" value={stats.enumerated} icon={AlertTriangle} color="text-stone-500" bg="bg-stone-50" />
+            </>
+          ) : (
+            <>
+              <MetricCard label="Total Staff" value={stats.totalStaff} icon={Users} color="text-amber-700" bg="bg-amber-50" />
+              <MetricCard label="Waitlist" value={stats.pendingStaff} icon={Clock} color="text-stone-700" bg="bg-stone-100" />
+              <MetricCard label="Enumerators" value={stats.enumerationStaff} icon={Edit3} color="text-amber-800" bg="bg-orange-50" />
+              <MetricCard label="Onboarding" value={stats.onboardingStaff} icon={UserCheck} color="text-stone-500" bg="bg-stone-50" />
+            </>
+          )}
         </div>
         {activeTab === 'outlets' ? 
           <DistributionTab
