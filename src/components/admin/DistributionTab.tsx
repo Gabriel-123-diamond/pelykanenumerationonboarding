@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Download, FileText, Store, Search, ChevronDown, Check } from 'lucide-react';
+import { Download, FileText, Store, Search, ChevronDown, Check, X, Users } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import type { Outlet } from '../../types';
 
@@ -24,19 +24,22 @@ interface DistributionTabProps {
 export const DistributionTab: React.FC<DistributionTabProps> = ({
   outlets, filter, setFilter, statusFilter, setStatusFilter, agentFilter, setAgentFilter, startDate, setStartDate, endDate, setEndDate, agents, setSelectedOutlet, onExportCsv, onExportWord
 }) => {
-  const [isAgentMenuOpen, setIsAgentMenuOpen] = useState(false);
+  const [isAgentDialogOpen, setIsAgentDialogOpen] = useState(false);
   const [agentSearchQuery, setAgentSearchQuery] = useState('');
-  const agentMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (agentMenuRef.current && !agentMenuRef.current.contains(event.target as Node)) {
-        setIsAgentMenuOpen(false);
-      }
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsAgentDialogOpen(false);
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    if (isAgentDialogOpen) {
+      document.addEventListener('keydown', handleEsc);
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.removeEventListener('keydown', handleEsc);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isAgentDialogOpen]);
 
   const filteredAgentsList = agents.filter(agent => 
     agent.toLowerCase().includes(agentSearchQuery.toLowerCase())
@@ -81,60 +84,142 @@ export const DistributionTab: React.FC<DistributionTabProps> = ({
               <option value="active_customer">Active Customer</option>
             </select>
           </div>
-          <div className="space-y-1.5 relative" ref={agentMenuRef}>
+          <div className="space-y-1.5">
             <label className="text-[8px] font-black text-stone-400 uppercase tracking-widest ml-1">Field Agent</label>
             <button
-              onClick={() => setIsAgentMenuOpen(!isAgentMenuOpen)}
-              className="bg-white border border-amber-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest outline-none shadow-sm w-full flex items-center justify-between text-left h-[38px]"
+              onClick={() => setIsAgentDialogOpen(true)}
+              className="bg-white border border-amber-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest outline-none shadow-sm w-full flex items-center justify-between text-left h-[38px] hover:border-amber-400 transition-colors"
             >
               <span className="truncate">{agentFilter === 'all' ? 'All Agents' : agentFilter}</span>
-              <ChevronDown size={14} className={cn("transition-transform", isAgentMenuOpen && "rotate-180")} />
+              <div className="flex items-center gap-2">
+                {agentFilter !== 'all' && <div className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse" />}
+                <Users size={14} className="text-stone-400" />
+              </div>
             </button>
 
-            {isAgentMenuOpen && (
-              <div className="absolute top-full left-0 w-full mt-2 bg-white border border-amber-100 rounded-2xl shadow-2xl z-[100] animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden">
-                <div className="p-3 border-b border-stone-50">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={12} />
-                    <input 
-                      type="text"
-                      placeholder="Search Agent..."
-                      value={agentSearchQuery}
-                      onChange={(e) => setAgentSearchQuery(e.target.value)}
-                      autoFocus
-                      className="w-full bg-stone-50 border border-stone-100 rounded-xl pl-9 pr-4 py-2 text-[10px] font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    />
-                  </div>
-                </div>
-                <div className="max-h-60 overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-amber-200">
-                  <button
-                    onClick={() => { setAgentFilter('all'); setIsAgentMenuOpen(false); setAgentSearchQuery(''); }}
-                    className={cn(
-                      "w-full text-left px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center justify-between group transition-colors",
-                      agentFilter === 'all' ? "bg-amber-600 text-white" : "hover:bg-amber-50 text-stone-600"
-                    )}
-                  >
-                    All Agents
-                    {agentFilter === 'all' && <Check size={12} />}
-                  </button>
-                  {filteredAgentsList.map(agent => (
-                    <button
-                      key={agent}
-                      onClick={() => { setAgentFilter(agent); setIsAgentMenuOpen(false); setAgentSearchQuery(''); }}
-                      className={cn(
-                        "w-full text-left px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center justify-between group transition-colors",
-                        agentFilter === agent ? "bg-amber-600 text-white" : "hover:bg-amber-50 text-stone-600"
-                      )}
-                    >
-                      <span className="truncate">{agent}</span>
-                      {agentFilter === agent && <Check size={12} />}
-                    </button>
-                  ))}
-                  {filteredAgentsList.length === 0 && (
-                    <div className="p-4 text-center">
-                      <p className="text-[8px] font-black text-stone-400 uppercase tracking-widest">No agents found</p>
+            {/* Agent Selection Dialog */}
+            {isAgentDialogOpen && (
+              <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                <div 
+                  className="absolute inset-0 bg-stone-950/60 backdrop-blur-sm animate-in fade-in duration-300" 
+                  onClick={() => setIsAgentDialogOpen(false)} 
+                />
+                <div className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[80vh]">
+                  {/* Dialog Header */}
+                  <div className="p-8 pb-4 border-b border-stone-50 flex items-center justify-between bg-stone-50/30">
+                    <div>
+                      <h3 className="text-sm font-black text-stone-900 uppercase tracking-tighter italic flex items-center gap-3">
+                        <Users size={18} className="text-amber-600" />
+                        Agent Selection
+                      </h3>
+                      <p className="text-[9px] font-black text-stone-400 uppercase tracking-[0.2em] mt-1">Filter distribution by field officer</p>
                     </div>
-                  )}
+                    <button 
+                      onClick={() => setIsAgentDialogOpen(false)} 
+                      className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-stone-400 hover:text-stone-950 hover:bg-stone-100 transition-all shadow-sm border border-stone-100"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
+
+                  {/* Search Bar */}
+                  <div className="p-8 py-6 border-b border-stone-50">
+                    <div className="relative group">
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 group-focus-within:text-amber-600 transition-colors" size={16} />
+                      <input 
+                        type="text"
+                        placeholder="SEARCH FIELD AGENTS..."
+                        value={agentSearchQuery}
+                        onChange={(e) => setAgentSearchQuery(e.target.value)}
+                        autoFocus
+                        className="w-full bg-stone-50 border border-stone-100 rounded-2xl pl-12 pr-12 py-4 text-[10px] font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
+                      />
+                      {agentSearchQuery && (
+                        <button 
+                          onClick={() => setAgentSearchQuery('')}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-amber-600 transition-colors"
+                        >
+                          <X size={14} />
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between mt-4 px-2">
+                      <p className="text-[8px] font-black text-stone-400 uppercase tracking-widest">
+                        {filteredAgentsList.length} of {agents.length} agents found
+                      </p>
+                      {agentFilter !== 'all' && (
+                        <button 
+                          onClick={() => { setAgentFilter('all'); setIsAgentDialogOpen(false); }}
+                          className="text-[8px] font-black text-amber-600 uppercase tracking-widest hover:underline"
+                        >
+                          Reset Filter
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Scrollable Agent List */}
+                  <div className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-amber-200">
+                    <div className="grid grid-cols-1 gap-2">
+                      <button
+                        onClick={() => { setAgentFilter('all'); setIsAgentDialogOpen(false); setAgentSearchQuery(''); }}
+                        className={cn(
+                          "w-full text-left px-6 py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-between group transition-all duration-300",
+                          agentFilter === 'all' ? "bg-amber-600 text-white shadow-lg shadow-amber-900/20" : "bg-stone-50 text-stone-600 border border-transparent hover:border-amber-400 hover:bg-amber-50"
+                        )}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={cn("w-2 h-2 rounded-full", agentFilter === 'all' ? "bg-white animate-pulse" : "bg-stone-300")} />
+                          Show All Agents
+                        </div>
+                        {agentFilter === 'all' && <Check size={16} />}
+                      </button>
+
+                      <div className="h-4" /> {/* Spacer */}
+
+                      {filteredAgentsList.map(agent => (
+                        <button
+                          key={agent}
+                          onClick={() => { setAgentFilter(agent); setIsAgentDialogOpen(false); setAgentSearchQuery(''); }}
+                          className={cn(
+                            "w-full text-left px-6 py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-between group transition-all duration-300",
+                            agentFilter === agent ? "bg-stone-950 text-white shadow-xl" : "bg-stone-50 text-stone-600 border border-transparent hover:border-amber-400 hover:bg-amber-50"
+                          )}
+                        >
+                          <div className="flex items-center gap-4 min-w-0">
+                            <div className={cn("w-2 h-2 rounded-full shrink-0", agentFilter === agent ? "bg-amber-500 animate-pulse" : "bg-stone-200 group-hover:bg-amber-400")} />
+                            <span className="truncate">{agent}</span>
+                          </div>
+                          {agentFilter === agent && <Check size={16} className="text-amber-500" />}
+                        </button>
+                      ))}
+
+                      {filteredAgentsList.length === 0 && (
+                        <div className="py-20 text-center bg-stone-50 rounded-[2rem] border border-dashed border-stone-200">
+                          <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-stone-200 border border-stone-100 shadow-sm">
+                            <Search size={24} />
+                          </div>
+                          <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest">No matching agents found</p>
+                          <button 
+                            onClick={() => setAgentSearchQuery('')}
+                            className="mt-4 text-[9px] font-black text-amber-600 uppercase tracking-widest hover:underline"
+                          >
+                            Clear search query
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Dialog Footer */}
+                  <div className="p-8 pt-4 bg-stone-50/50 border-t border-stone-50">
+                    <button 
+                      onClick={() => setIsAgentDialogOpen(false)}
+                      className="w-full py-4 rounded-2xl bg-stone-950 text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-amber-600 transition-all shadow-xl active:scale-95"
+                    >
+                      Close Selection
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
