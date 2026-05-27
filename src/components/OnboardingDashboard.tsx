@@ -101,7 +101,7 @@ export const OnboardingDashboard: React.FC = () => {
   if (loading) return (
     <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center gap-6">
       <div className="animate-spin rounded-full h-16 w-16 border-4 border-amber-600/20 border-t-amber-600" />
-      <p className="text-amber-600/50 text-[10px] font-black uppercase tracking-[0.4em]">Initializing Onboarding Pipeline</p>
+      <p className="text-amber-600/50 text-[10px] font-black uppercase tracking-[0.18em] sm:tracking-[0.4em] text-center px-4">Initializing Onboarding Pipeline</p>
     </div>
   );
 
@@ -110,25 +110,25 @@ export const OnboardingDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#FDFCFB]">
-      <header className="bg-stone-950 text-white py-12 px-8 shadow-2xl relative overflow-hidden">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between relative z-10 gap-8">
-          <div className="flex items-center gap-6">
-            <div className="bg-amber-600 p-4 rounded-3xl shadow-xl"><LayoutDashboard size={32} /></div>
-            <div>
-              <h1 className="text-3xl font-black uppercase tracking-tighter italic">
+      <header className="bg-stone-950 text-white py-8 sm:py-12 px-4 sm:px-8 shadow-2xl relative overflow-hidden">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between relative z-10 gap-6 md:gap-8">
+          <div className="flex items-center gap-4 sm:gap-6 min-w-0">
+            <div className="bg-amber-600 p-3 sm:p-4 rounded-2xl sm:rounded-3xl shadow-xl shrink-0"><LayoutDashboard size={28} /></div>
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-3xl font-black uppercase tracking-tighter italic truncate">
                 {activeTab === 'queue' ? 'Onboarding Control' : 'Activation History'}
               </h1>
-              <p className="text-amber-500/60 text-[10px] font-black tracking-[0.4em] mt-1">
+              <p className="text-amber-500/60 text-[8px] sm:text-[10px] font-black tracking-[0.18em] sm:tracking-[0.4em] mt-1">
                 {activeTab === 'queue' ? 'Verification & Pipeline Management' : `Performance Overview • ${activatedCount} Activations`}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex bg-stone-900 p-1.5 rounded-2xl border border-stone-800">
+          <div className="flex items-center gap-4 w-full md:w-auto">
+            <div className="grid grid-cols-2 sm:flex bg-stone-900 p-1.5 rounded-2xl border border-stone-800 w-full md:w-auto">
               <button 
                 onClick={() => setActiveTab('queue')}
                 className={cn(
-                  "px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2",
+                  "px-3 sm:px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-tight sm:tracking-widest transition-all flex items-center justify-center gap-2",
                   activeTab === 'queue' ? "bg-amber-600 text-white shadow-lg" : "text-stone-500 hover:text-stone-300"
                 )}
               >
@@ -137,7 +137,7 @@ export const OnboardingDashboard: React.FC = () => {
               <button 
                 onClick={() => setActiveTab('history')}
                 className={cn(
-                  "px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2",
+                  "px-3 sm:px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-tight sm:tracking-widest transition-all flex items-center justify-center gap-2",
                   activeTab === 'history' ? "bg-amber-600 text-white shadow-lg" : "text-stone-500 hover:text-stone-300"
                 )}
               >
@@ -148,23 +148,23 @@ export const OnboardingDashboard: React.FC = () => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto py-12 px-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 animate-in fade-in slide-in-from-top-4 duration-700">
-          <div className="bg-white p-8 rounded-[2.5rem] border border-amber-100 shadow-xl shadow-stone-200/50 flex items-center gap-6">
+      <main className="max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8 mb-10 sm:mb-16 animate-in fade-in slide-in-from-top-4 duration-700">
+          <div className="bg-white p-5 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-amber-100 shadow-xl shadow-stone-200/50 flex items-center gap-4 sm:gap-6">
             <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 shadow-inner"><ListChecks size={28} /></div>
             <div>
               <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-1">In Queue</p>
               <p className="text-3xl font-black text-stone-900 italic leading-none">{outlets.length}</p>
             </div>
           </div>
-          <div className="bg-white p-8 rounded-[2.5rem] border border-amber-100 shadow-xl shadow-stone-200/50 flex items-center gap-6">
+          <div className="bg-white p-5 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-amber-100 shadow-xl shadow-stone-200/50 flex items-center gap-4 sm:gap-6">
             <div className="w-16 h-16 bg-stone-100 rounded-2xl flex items-center justify-center text-stone-600 shadow-inner"><CheckCircle size={28} /></div>
             <div>
               <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-1">Activated</p>
               <p className="text-3xl font-black text-stone-900 italic leading-none">{activatedCount}</p>
             </div>
           </div>
-          <div className="bg-stone-950 p-8 rounded-[2.5rem] shadow-xl shadow-black/20 flex items-center gap-6">
+          <div className="bg-stone-950 p-5 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-xl shadow-black/20 flex items-center gap-4 sm:gap-6">
             <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center text-amber-500 shadow-inner border border-white/5"><XCircle size={28} /></div>
             <div>
               <p className="text-[10px] font-black text-stone-500 uppercase tracking-widest mb-1">Declined</p>
@@ -176,7 +176,7 @@ export const OnboardingDashboard: React.FC = () => {
         {activeTab === 'queue' ? (
           <div className="space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-700">
             {outlets.length === 0 ? (
-              <div className="bg-white rounded-[3rem] p-24 text-center border border-amber-100 shadow-xl">
+              <div className="bg-white rounded-[2rem] sm:rounded-[3rem] p-8 sm:p-24 text-center border border-amber-100 shadow-xl">
                 <div className="w-24 h-24 bg-stone-50 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 border border-stone-100 shadow-inner">
                   <Clock size={40} className="text-stone-200" />
                 </div>
@@ -187,17 +187,17 @@ export const OnboardingDashboard: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-12">
-                <div className="bg-white p-8 rounded-[2.5rem] border border-amber-100 shadow-xl max-w-2xl mx-auto">
+                <div className="bg-white p-5 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-amber-100 shadow-xl max-w-2xl mx-auto">
                   <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest ml-1 mb-3 block italic">Select Target Outlet for Onboarding</label>
                   <div className="relative group">
                     <select
                       value={selectedOutletId}
                       onChange={(e) => setSelectedOutletId(e.target.value)}
-                      className="w-full bg-stone-50 border border-stone-100 rounded-2xl px-6 py-5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 appearance-none shadow-inner cursor-pointer"
+                      className="w-full bg-stone-50 border border-stone-100 rounded-2xl pl-5 pr-12 sm:px-6 py-5 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 appearance-none shadow-inner cursor-pointer"
                     >
                       <option value="">Choose from {outlets.length} Pending Outlets...</option>
                       {outlets.map(outlet => (
-                        <option key={outlet.id} value={outlet.id}>{outlet.name} — {outlet.town} (Grade {outlet.recommendedClass})</option>
+                        <option key={outlet.id} value={outlet.id}>{outlet.name} - {outlet.town} (Grade {outlet.recommendedClass})</option>
                       ))}
                     </select>
                     <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-amber-600 group-hover:scale-110 transition-transform">
@@ -221,7 +221,7 @@ export const OnboardingDashboard: React.FC = () => {
                     }}
                   />
                 ) : (
-                  <div className="bg-amber-50/50 border-2 border-dashed border-amber-100 rounded-[3rem] p-20 text-center animate-pulse">
+                  <div className="bg-amber-50/50 border-2 border-dashed border-amber-100 rounded-[2rem] sm:rounded-[3rem] p-8 sm:p-20 text-center animate-pulse">
                     <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm border border-amber-50">
                       <ListChecks size={24} className="text-amber-400" />
                     </div>
@@ -234,7 +234,7 @@ export const OnboardingDashboard: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-bottom-6 duration-700">
             {history.length === 0 ? (
-              <div className="col-span-full bg-white rounded-[3rem] p-24 text-center border border-amber-100 shadow-xl">
+              <div className="col-span-full bg-white rounded-[2rem] sm:rounded-[3rem] p-8 sm:p-24 text-center border border-amber-100 shadow-xl">
                 <div className="w-24 h-24 bg-stone-50 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 border border-stone-100 shadow-inner">
                   <CheckCircle size={40} className="text-stone-200" />
                 </div>
@@ -245,7 +245,7 @@ export const OnboardingDashboard: React.FC = () => {
               </div>
             ) : (
               history.map((outlet) => (
-                <div key={outlet.id} className="bg-white rounded-[2.5rem] p-8 border border-amber-100 shadow-xl hover:shadow-2xl transition-all group relative overflow-hidden">
+                <div key={outlet.id} className="bg-white rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-8 border border-amber-100 shadow-xl hover:shadow-2xl transition-all group relative overflow-hidden">
                   <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform"><CheckCircle size={120} /></div>
                   <div className="flex items-center gap-5 mb-8 relative z-10">
                     <div className="w-14 h-14 bg-amber-600 rounded-2xl flex items-center justify-center text-white shadow-lg">

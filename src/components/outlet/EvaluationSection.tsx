@@ -11,7 +11,7 @@ export const EvaluationSection: React.FC<{ outlet: Outlet }> = ({ outlet }) => (
           <Star size={14} /> Algorithmic Ranking
         </h3>
         <div className="flex items-end gap-4">
-          <p className="text-7xl font-black italic tracking-tighter leading-none">Grade {outlet.recommendedClass || 'N/A'}</p>
+          <p className="text-7xl font-black italic tracking-tighter leading-none">Grade {outlet.recommendedClass || 'Not Available'}</p>
           <div className="pb-1">
             <p className="text-[10px] font-black text-stone-500 uppercase tracking-widest">Aggregate</p>
             <p className="text-2xl font-black text-amber-500 italic">{outlet.totalScore || 0}</p>

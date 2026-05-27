@@ -1,5 +1,5 @@
 import React from 'react';
-import { Store } from 'lucide-react';
+import { Download, FileText, Store } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import type { Outlet } from '../../types';
 
@@ -10,13 +10,15 @@ interface DistributionTabProps {
   statusFilter: string;
   setStatusFilter: (val: string) => void;
   setSelectedOutlet: (outlet: Outlet) => void;
+  onExportCsv: () => void;
+  onExportWord: () => void;
 }
 
 export const DistributionTab: React.FC<DistributionTabProps> = ({
-  outlets, filter, setFilter, statusFilter, setStatusFilter, setSelectedOutlet
+  outlets, filter, setFilter, statusFilter, setStatusFilter, setSelectedOutlet, onExportCsv, onExportWord
 }) => (
-  <div className="bg-white rounded-[3rem] shadow-xl shadow-stone-200/50 border border-amber-100 overflow-hidden animate-in fade-in duration-700">
-    <div className="p-10 border-b border-amber-50 flex flex-col md:flex-row md:items-center justify-between bg-stone-50/30 gap-6">
+  <div className="bg-white rounded-[2rem] sm:rounded-[3rem] shadow-xl shadow-stone-200/50 border border-amber-100 overflow-hidden animate-in fade-in duration-700">
+    <div className="p-5 sm:p-10 border-b border-amber-50 flex flex-col md:flex-row md:items-center justify-between bg-stone-50/30 gap-6">
       <div>
         <h2 className="text-xl font-black text-stone-950 uppercase tracking-tighter italic">Distribution Pipeline</h2>
         <p className="text-stone-400 text-xs font-bold uppercase tracking-widest mt-1">Real-time market synchronization</p>
@@ -25,7 +27,7 @@ export const DistributionTab: React.FC<DistributionTabProps> = ({
         <input 
           type="text" placeholder="Search outlets..." value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="bg-white border border-amber-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest focus:ring-2 focus:ring-amber-500 outline-none w-48 shadow-sm"
+          className="bg-white border border-amber-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest focus:ring-2 focus:ring-amber-500 outline-none w-full sm:w-48 shadow-sm"
         />
         <select 
           value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
@@ -36,7 +38,12 @@ export const DistributionTab: React.FC<DistributionTabProps> = ({
           <option value="pending_onboarding">Pending Onboarding</option>
           <option value="active_customer">Active Customer</option>
         </select>
-        <span className="bg-stone-900 text-white text-[10px] font-black px-4 py-1.5 rounded-xl uppercase flex items-center shadow-lg">Live</span>
+        <button onClick={onExportCsv} className="bg-stone-900 text-white text-[10px] font-black px-4 py-2 rounded-xl uppercase flex items-center gap-2 shadow-lg border border-stone-800 hover:bg-amber-600 transition-colors leading-tight">
+          <Download size={14} /> Excel or Google Sheets
+        </button>
+        <button onClick={onExportWord} className="bg-white text-stone-700 text-[10px] font-black px-4 py-2 rounded-xl uppercase flex items-center gap-2 shadow-sm border border-amber-100 hover:border-amber-300 transition-colors leading-tight">
+          <FileText size={14} /> Word or Google Docs
+        </button>
       </div>
     </div>
     <div className="overflow-x-auto">
@@ -55,7 +62,7 @@ export const DistributionTab: React.FC<DistributionTabProps> = ({
         <tbody className="divide-y divide-amber-50">
           {outlets.length === 0 ? (
             <tr>
-              <td colSpan={6} className="p-20 text-center">
+              <td colSpan={7} className="p-8 sm:p-20 text-center">
                 <div className="w-20 h-20 bg-stone-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 border border-stone-100 shadow-inner">
                   <Store size={32} className="text-stone-200" />
                 </div>
@@ -71,7 +78,7 @@ export const DistributionTab: React.FC<DistributionTabProps> = ({
                 </td>
                 <td className="p-6">
                   <span className="bg-stone-900 text-amber-500 text-[10px] font-black px-3 py-1 rounded-lg border border-stone-800">
-                    GRADE {outlet.recommendedClass || 'N/A'}
+                    GRADE {outlet.recommendedClass || 'Not Available'}
                   </span>
                 </td>
                 <td className="p-6">

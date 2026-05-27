@@ -8,6 +8,7 @@ import { OutletDetailModal } from './OutletDetailModal';
 import { MetricCard } from './admin/MetricCard';
 import { DistributionTab } from './admin/DistributionTab';
 import { StaffDeskTab } from './admin/StaffDeskTab';
+import { exportOutletsCsv, exportOutletsWord, exportStaffCsv, exportStaffWord } from '../lib/exportUtils';
 
 export const AdminDashboard: React.FC = () => {
   const [outlets, setOutlets] = useState<Outlet[]>([]);
@@ -69,38 +70,47 @@ export const AdminDashboard: React.FC = () => {
   if (loading) return (
     <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center gap-6">
       <div className="animate-spin rounded-full h-16 w-16 border-4 border-amber-600/20 border-t-amber-600" />
-      <p className="text-amber-600/50 text-[10px] font-black uppercase tracking-[0.4em]">Synchronizing Control Center</p>
+      <p className="text-amber-600/50 text-[10px] font-black uppercase tracking-[0.18em] sm:tracking-[0.4em] text-center px-4">Synchronizing Control Center</p>
     </div>
   );
 
   return (
     <div className="min-h-screen bg-[#FDFCFB]">
-      <header className="bg-stone-950 text-white py-10 px-8 shadow-2xl relative overflow-hidden">
-        <div className="max-w-7xl mx-auto flex items-center justify-between relative z-10">
-          <div className="flex items-center gap-6">
-            <div className="bg-amber-600 p-4 rounded-3xl shadow-xl"><LayoutDashboard size={32} /></div>
-            <div>
-              <h1 className="text-3xl font-black uppercase tracking-tighter italic">Bakery Control</h1>
-              <p className="text-amber-500/60 text-[10px] font-black tracking-[0.4em] mt-1">Meal Villa Management</p>
+      <header className="bg-stone-950 text-white py-8 sm:py-10 px-4 sm:px-8 shadow-2xl relative overflow-hidden">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+          <div className="flex items-center gap-4 sm:gap-6 min-w-0">
+            <div className="bg-amber-600 p-3 sm:p-4 rounded-2xl sm:rounded-3xl shadow-xl shrink-0"><LayoutDashboard size={28} /></div>
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-3xl font-black uppercase tracking-tighter italic truncate">Bakery Control</h1>
+              <p className="text-amber-500/60 text-[9px] sm:text-[10px] font-black tracking-[0.2em] sm:tracking-[0.4em] mt-1">Meal Villa Management</p>
             </div>
           </div>
-          <div className="flex gap-4">
-            <button onClick={() => setActiveTab('staff')} className={cn("px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-3 border shadow-lg", activeTab === 'staff' ? "bg-amber-600 text-white border-amber-500" : "bg-stone-900 text-stone-400 border-stone-800")}>
+          <div className="grid grid-cols-2 sm:flex gap-3 sm:gap-4 w-full md:w-auto">
+            <button onClick={() => setActiveTab('staff')} className={cn("px-4 sm:px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-tight sm:tracking-widest transition-all flex items-center justify-center gap-2 sm:gap-3 border shadow-lg", activeTab === 'staff' ? "bg-amber-600 text-white border-amber-500" : "bg-stone-900 text-stone-400 border-stone-800")}>
               <Users size={16} /> Staff Desk {stats.pendingStaff > 0 && <span className="bg-white text-amber-600 px-2 py-0.5 rounded-full animate-bounce">{stats.pendingStaff}</span>}
             </button>
-            <button onClick={() => setActiveTab('outlets')} className={cn("px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border shadow-lg", activeTab === 'outlets' ? "bg-amber-600 text-white border-amber-500" : "bg-stone-900 text-stone-400 border-stone-800")}>Distribution</button>
+            <button onClick={() => setActiveTab('outlets')} className={cn("px-4 sm:px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-tight sm:tracking-widest transition-all border shadow-lg", activeTab === 'outlets' ? "bg-amber-600 text-white border-amber-500" : "bg-stone-900 text-stone-400 border-stone-800")}>Distribution</button>
           </div>
         </div>
       </header>
-      <main className="max-w-7xl mx-auto py-12 px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+      <main className="max-w-7xl mx-auto py-8 sm:py-12 px-4 sm:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 sm:gap-8 mb-8 sm:mb-12">
           <MetricCard label="Total Outlets" value={stats.total} icon={Store} color="text-amber-700" bg="bg-amber-50" />
           <MetricCard label="Active Pipeline" value={stats.active} icon={CheckCircle} color="text-stone-700" bg="bg-stone-100" />
           <MetricCard label="Pending Review" value={stats.pending} icon={Clock} color="text-amber-800" bg="bg-orange-50" />
           <MetricCard label="New Lead" value={stats.enumerated} icon={AlertTriangle} color="text-stone-500" bg="bg-stone-50" />
         </div>
         {activeTab === 'outlets' ? 
-          <DistributionTab outlets={filteredOutlets} filter={outletFilter} setFilter={setOutletFilter} statusFilter={statusFilter} setStatusFilter={setStatusFilter} setSelectedOutlet={setSelectedOutlet} /> :
+          <DistributionTab
+            outlets={filteredOutlets}
+            filter={outletFilter}
+            setFilter={setOutletFilter}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            setSelectedOutlet={setSelectedOutlet}
+            onExportCsv={() => exportOutletsCsv(filteredOutlets, 'outlet-export')}
+            onExportWord={() => exportOutletsWord(filteredOutlets, 'outlet-export')}
+          /> :
           <StaffDeskTab 
             pendingUsers={pendingUsers} 
             filteredStaff={filteredStaff} 
@@ -111,6 +121,8 @@ export const AdminDashboard: React.FC = () => {
             totalStaff={stats.totalStaff} 
             handleApproveUser={handleApproveUser} 
             getStaffMetrics={getStaffMetrics} 
+            onExportCsv={() => exportStaffCsv(filteredStaff, getStaffMetrics, 'staff-export')}
+            onExportWord={() => exportStaffWord(filteredStaff, getStaffMetrics, 'staff-export')}
           />
         }
       </main>

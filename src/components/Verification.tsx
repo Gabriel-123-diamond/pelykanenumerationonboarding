@@ -25,12 +25,12 @@ const CHECKLIST_ITEMS: { key: keyof OnboardingChecklist; label: string }[] = [
 
 export const Verification: React.FC<VerificationProps> = ({ checklist, onChange }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white p-8 rounded-[2.5rem] shadow-xl shadow-stone-200/50 border border-amber-100/50">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 bg-white p-4 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-xl shadow-stone-200/50 border border-amber-100/50">
       {CHECKLIST_ITEMS.map((item) => (
         <div
           key={item.key}
           className={cn(
-            "flex items-center justify-between p-5 rounded-2xl border transition-all cursor-pointer group",
+            "flex items-center justify-between gap-3 p-4 sm:p-5 rounded-2xl border transition-all cursor-pointer group",
             checklist[item.key] 
               ? "bg-amber-50 border-amber-200" 
               : "bg-stone-50 border-stone-100 hover:border-amber-400 hover:bg-white"
@@ -38,14 +38,14 @@ export const Verification: React.FC<VerificationProps> = ({ checklist, onChange 
           onClick={() => onChange(item.key, !checklist[item.key])}
         >
           <span className={cn(
-            "text-[11px] font-black uppercase tracking-tight italic transition-colors",
+            "text-[10px] sm:text-[11px] font-black uppercase tracking-tight italic transition-colors",
             checklist[item.key] ? "text-amber-700" : "text-stone-600 group-hover:text-stone-950"
           )}>
             {item.label}
           </span>
           <div
             className={cn(
-              "w-12 h-7 flex items-center rounded-full p-1.5 transition-all duration-500",
+              "w-12 h-7 flex items-center rounded-full p-1.5 transition-all duration-500 shrink-0",
               checklist[item.key] ? "bg-amber-600 shadow-[0_0_15px_rgba(217,119,6,0.3)]" : "bg-stone-200 group-hover:bg-stone-300"
             )}
           >

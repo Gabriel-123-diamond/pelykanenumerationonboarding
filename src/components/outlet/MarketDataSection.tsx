@@ -11,7 +11,7 @@ export const MarketDataSection: React.FC<{ outlet: Outlet }> = ({ outlet }) => (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
       {[
         { label: 'Current Supplier', value: outlet.currentSupplier },
-        { label: 'Avg Daily Sales', value: outlet.avgDailySales },
+        { label: 'Average Daily Sales', value: outlet.avgDailySales },
         { label: 'Best Seller', value: outlet.bestSellingSize },
         { label: 'Peak Sales Time', value: outlet.peakSalesTime },
         { label: 'Buying Price', value: outlet.currentBuyingPrice },

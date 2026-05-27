@@ -172,15 +172,15 @@ export const EnumerationDashboard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#FDFCFB] pb-24">
-      <header className="bg-stone-950 text-white pt-8 pb-4 px-6 sticky top-0 z-10 shadow-2xl">
-        <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
+      <header className="bg-stone-950 text-white pt-6 sm:pt-8 pb-4 px-4 sm:px-6 sticky top-0 z-10 shadow-2xl">
+        <div className="max-w-2xl mx-auto flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
             <div className="bg-amber-600 p-3 rounded-2xl shadow-lg shadow-amber-900/20"><Store size={24} /></div>
-            <div>
-              <h1 className="text-xl font-black uppercase tracking-tighter italic">
+            <div className="min-w-0">
+              <h1 className="text-base sm:text-xl font-black uppercase tracking-tighter italic truncate">
                 {editingOutletId ? 'Edit Enumeration' : activeTab === 'new' ? 'New Enumeration' : 'Enumeration History'}
               </h1>
-              <p className="text-amber-500/50 text-[9px] font-black uppercase tracking-[0.3em]">
+              <p className="text-amber-500/50 text-[8px] sm:text-[9px] font-black uppercase tracking-[0.18em] sm:tracking-[0.3em]">
                 {activeTab === 'new' ? `Step ${step} of 4 • Market Data` : `${history.length} Outlets Captured`}
               </p>
             </div>
@@ -213,17 +213,17 @@ export const EnumerationDashboard: React.FC = () => {
         )}
       </header>
 
-      <main className="max-w-2xl mx-auto p-6 mt-6">
-        <div className="grid grid-cols-3 gap-4 mb-10 animate-in fade-in slide-in-from-top-4 duration-700">
-          <div className="bg-white p-5 rounded-[2rem] border border-amber-100 shadow-xl shadow-stone-200/50 flex flex-col items-center text-center">
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 mt-6">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-8 sm:mb-10 animate-in fade-in slide-in-from-top-4 duration-700">
+          <div className="bg-white p-3 sm:p-5 rounded-2xl sm:rounded-[2rem] border border-amber-100 shadow-xl shadow-stone-200/50 flex flex-col items-center text-center">
             <p className="text-[7px] font-black text-stone-400 uppercase tracking-widest mb-1">Total Captured</p>
             <p className="text-xl font-black text-stone-900 italic leading-none">{stats.total}</p>
           </div>
-          <div className="bg-white p-5 rounded-[2rem] border border-amber-100 shadow-xl shadow-stone-200/50 flex flex-col items-center text-center">
+          <div className="bg-white p-3 sm:p-5 rounded-2xl sm:rounded-[2rem] border border-amber-100 shadow-xl shadow-stone-200/50 flex flex-col items-center text-center">
             <p className="text-[7px] font-black text-amber-600 uppercase tracking-widest mb-1">Live/Active</p>
             <p className="text-xl font-black text-amber-600 italic leading-none">{stats.active}</p>
           </div>
-          <div className="bg-stone-900 p-5 rounded-[2rem] shadow-xl shadow-black/20 flex flex-col items-center text-center">
+          <div className="bg-stone-900 p-3 sm:p-5 rounded-2xl sm:rounded-[2rem] shadow-xl shadow-black/20 flex flex-col items-center text-center">
             <p className="text-[7px] font-black text-stone-500 uppercase tracking-widest mb-1">In Review</p>
             <p className="text-xl font-black text-white italic leading-none">{stats.pending}</p>
           </div>
@@ -239,7 +239,7 @@ export const EnumerationDashboard: React.FC = () => {
               return <Step4Review recommendedClass={recommendedClass} total={total} handleSubmit={handleSubmit} loading={loading} />;
             })()}
 
-            <div className="mt-12 mb-20 flex justify-between items-center bg-white p-8 rounded-[2.5rem] border border-amber-100 shadow-xl shadow-stone-200/50">
+            <div className="mt-8 sm:mt-12 mb-20 flex justify-between items-center gap-3 bg-white p-4 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-amber-100 shadow-xl shadow-stone-200/50">
               <button 
                 onClick={() => {
                   if (step === 1 && editingOutletId) {
@@ -250,7 +250,7 @@ export const EnumerationDashboard: React.FC = () => {
                   }
                 }} 
                 disabled={(step === 1 && !editingOutletId) || loading} 
-                className="px-8 py-3 font-black text-stone-400 uppercase tracking-widest text-[10px] disabled:opacity-0 transition-all hover:text-amber-600"
+                className="px-4 sm:px-8 py-3 font-black text-stone-400 uppercase tracking-widest text-[10px] disabled:opacity-0 transition-all hover:text-amber-600"
               >
                 {step === 1 && editingOutletId ? "Cancel Edit" : "Back"}
               </button>
@@ -267,7 +267,7 @@ export const EnumerationDashboard: React.FC = () => {
                   }
                 }} 
                 disabled={loading} 
-                className="bg-stone-950 text-white px-10 py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl shadow-black/20 active:scale-95 disabled:opacity-30 transition-all hover:bg-amber-600"
+                className="bg-stone-950 text-white px-5 sm:px-10 py-4 rounded-2xl font-black uppercase tracking-[0.14em] sm:tracking-[0.2em] text-[10px] shadow-2xl shadow-black/20 active:scale-95 disabled:opacity-30 transition-all hover:bg-amber-600"
               >
                 {step === 4 ? (loading ? "Saving..." : "Submit Review") : "Continue"}
               </button>
@@ -276,7 +276,7 @@ export const EnumerationDashboard: React.FC = () => {
         ) : (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {history.length === 0 ? (
-              <div className="bg-white rounded-[3rem] p-20 text-center border border-amber-100 shadow-xl">
+              <div className="bg-white rounded-[2rem] sm:rounded-[3rem] p-8 sm:p-20 text-center border border-amber-100 shadow-xl">
                 <div className="w-20 h-20 bg-stone-50 rounded-[2rem] flex items-center justify-center mx-auto mb-6 border border-stone-100 shadow-inner">
                   <Store size={32} className="text-stone-200" />
                 </div>
@@ -287,8 +287,8 @@ export const EnumerationDashboard: React.FC = () => {
               </div>
             ) : (
               history.map((outlet) => (
-                <div key={outlet.id} className="bg-white rounded-[2.5rem] p-6 border border-amber-100 shadow-xl shadow-stone-200/50 flex items-center justify-between group hover:border-amber-400 transition-all">
-                  <div className="flex items-center gap-5">
+                <div key={outlet.id} className="bg-white rounded-[2rem] sm:rounded-[2.5rem] p-4 sm:p-6 border border-amber-100 shadow-xl shadow-stone-200/50 flex items-center justify-between gap-3 group hover:border-amber-400 transition-all">
+                  <div className="flex items-center gap-3 sm:gap-5 min-w-0">
                     <div className="w-14 h-14 bg-stone-50 rounded-2xl flex items-center justify-center text-amber-600 border border-stone-100 group-hover:bg-amber-600 group-hover:text-white transition-colors relative overflow-hidden">
                       {outlet.photoUrls?.[0] ? (
                         <img src={outlet.photoUrls[0]} className="w-full h-full object-cover" alt="" />
@@ -296,15 +296,15 @@ export const EnumerationDashboard: React.FC = () => {
                         <Store size={24} />
                       )}
                     </div>
-                    <div>
-                      <h3 className="font-black text-stone-900 uppercase tracking-tight italic leading-none">{outlet.name}</h3>
-                      <div className="flex items-center gap-3 mt-2">
+                    <div className="min-w-0">
+                      <h3 className="font-black text-stone-900 uppercase tracking-tight italic leading-none truncate">{outlet.name}</h3>
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2">
                         <span className="bg-stone-900 text-amber-500 text-[8px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest border border-stone-800">Grade {outlet.recommendedClass}</span>
                         <span className="text-[9px] text-stone-400 font-bold uppercase tracking-widest">{outlet.town}</span>
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3 shrink-0">
                     <div className="text-right mr-4 hidden sm:block">
                       <p className="text-[8px] font-black text-stone-400 uppercase tracking-[0.2em]">Captured</p>
                       <p className="text-[10px] font-black text-stone-900 italic">{new Date(outlet.dateVisited).toLocaleDateString()}</p>
@@ -315,7 +315,7 @@ export const EnumerationDashboard: React.FC = () => {
                     >
                       <Edit3 size={18} />
                     </button>
-                    <div className="bg-stone-50 p-3 rounded-xl border border-stone-100">
+                    <div className="bg-stone-50 p-3 rounded-xl border border-stone-100 hidden sm:block">
                       <ChevronRight size={18} className="text-stone-300" />
                     </div>
                   </div>

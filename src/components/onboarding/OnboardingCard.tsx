@@ -32,23 +32,23 @@ export const OnboardingCard: React.FC<OnboardingCardProps> = ({ outlet, onUpdate
   };
 
   return (
-    <div className="bg-white rounded-[3rem] p-10 border border-amber-100 shadow-xl hover:shadow-2xl transition-all duration-500 group">
-      <div className="flex flex-col lg:flex-row gap-12">
+    <div className="bg-white rounded-[2rem] sm:rounded-[3rem] p-5 sm:p-10 border border-amber-100 shadow-xl hover:shadow-2xl transition-all duration-500 group">
+      <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
         <div className="flex-1 space-y-8">
           <div className="flex items-start justify-between">
-            <div className="flex items-center gap-6 w-full">
-              <div className="w-16 h-16 bg-amber-600 rounded-3xl flex items-center justify-center text-white shadow-xl group-hover:rotate-6 transition-transform shrink-0">
-                <Store size={32} />
+            <div className="flex items-center gap-4 sm:gap-6 w-full min-w-0">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 bg-amber-600 rounded-2xl sm:rounded-3xl flex items-center justify-center text-white shadow-xl group-hover:rotate-6 transition-transform shrink-0">
+                <Store size={28} />
               </div>
-              <div className="flex-1 space-y-2">
+              <div className="flex-1 space-y-2 min-w-0">
                 <input 
                   type="text" 
                   value={outlet.name} 
                   onChange={(e) => onUpdate(outlet.id, { name: e.target.value })}
-                  className="text-2xl font-black text-stone-900 uppercase tracking-tighter italic leading-none bg-transparent border-b border-transparent hover:border-stone-200 focus:border-amber-500 outline-none w-full"
+                  className="text-lg sm:text-2xl font-black text-stone-900 uppercase tracking-tighter italic leading-none bg-transparent border-b border-transparent hover:border-stone-200 focus:border-amber-500 outline-none w-full"
                   placeholder="Business Name"
                 />
-                <div className="flex items-center gap-3 mt-1">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1">
                   <span className="bg-stone-900 text-amber-500 text-[9px] font-black px-3 py-1 rounded-lg uppercase tracking-widest border border-stone-800">Grade {outlet.recommendedClass}</span>
                   <span className="text-[10px] text-stone-400 font-bold uppercase tracking-widest flex items-center gap-1.5"><MapPin size={12} className="text-amber-600" />{outlet.town}</span>
                 </div>
@@ -56,10 +56,22 @@ export const OnboardingCard: React.FC<OnboardingCardProps> = ({ outlet, onUpdate
             </div>
           </div>
 
-          {/* Field Evidence Photos */}
-          ... (omitted for brevity) ...
+          {outlet.photoUrls && outlet.photoUrls.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {outlet.photoUrls.map((url, index) => (
+                <button
+                  key={`${url}-${index}`}
+                  type="button"
+                  onClick={() => setPreviewImage(url)}
+                  className="aspect-square overflow-hidden rounded-2xl border border-stone-100 bg-stone-50 shadow-inner"
+                >
+                  <img src={url} className="h-full w-full object-cover transition-transform hover:scale-105" alt={`Outlet evidence ${index + 1}`} />
+                </button>
+              ))}
+            </div>
+          )}
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="bg-stone-50 p-5 rounded-2xl border border-stone-100">
               <p className="text-[8px] font-black text-stone-400 uppercase tracking-widest mb-2 italic ml-1">Classification Override</p>
               <select 
@@ -84,7 +96,7 @@ export const OnboardingCard: React.FC<OnboardingCardProps> = ({ outlet, onUpdate
               />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="bg-stone-50 p-5 rounded-2xl border border-stone-100">
               <p className="text-[8px] font-black text-stone-400 uppercase tracking-widest mb-1 italic ml-1">Manager</p>
               <input 
@@ -140,18 +152,21 @@ export const OnboardingCard: React.FC<OnboardingCardProps> = ({ outlet, onUpdate
             <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest flex items-center gap-2 ml-1">Logistics Assignment</p>
             <input type="text" placeholder="Assign Delivery Route..." value={outlet.route || ''} onChange={(e) => onUpdate(outlet.id, { route: e.target.value })} className="w-full bg-stone-50 border border-stone-100 rounded-2xl px-6 py-4 text-xs font-bold focus:ring-2 focus:ring-amber-500 outline-none" />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest ml-1">First Supply Date</p>
               <input type="date" value={outlet.firstSupplyDate || ''} onChange={(e) => onUpdate(outlet.id, { firstSupplyDate: e.target.value })} className="w-full bg-stone-50 border border-stone-100 rounded-2xl px-6 py-4 text-xs font-bold focus:ring-2 focus:ring-amber-500 outline-none" />
             </div>
             <div className="space-y-2">
-              <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest ml-1">Approved Credit Limit</p>
-              <input type="text" placeholder="e.g. 50,000" value={outlet.approvedCreditLimit || ''} onChange={(e) => onUpdate(outlet.id, { approvedCreditLimit: e.target.value })} className="w-full bg-stone-50 border border-stone-100 rounded-2xl px-6 py-4 text-xs font-bold focus:ring-2 focus:ring-amber-500 outline-none" />
+              <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest ml-1">Approved Credit Limit (Naira)</p>
+              <div className="relative">
+                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-xs font-black text-amber-600">₦</span>
+                <input type="text" inputMode="numeric" placeholder="50,000" value={outlet.approvedCreditLimit || ''} onChange={(e) => onUpdate(outlet.id, { approvedCreditLimit: e.target.value.replace(/[^\d,]/g, '') })} className="w-full bg-stone-50 border border-stone-100 rounded-2xl pl-10 pr-6 py-4 text-xs font-bold focus:ring-2 focus:ring-amber-500 outline-none" />
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center justify-between p-6 bg-stone-50 rounded-[2rem] border border-stone-100 group cursor-pointer" onClick={() => onUpdate(outlet.id, { physicalDocumentSigned: !outlet.physicalDocumentSigned })}>
+          <div className="flex items-center justify-between gap-4 p-4 sm:p-6 bg-stone-50 rounded-[2rem] border border-stone-100 group cursor-pointer" onClick={() => onUpdate(outlet.id, { physicalDocumentSigned: !outlet.physicalDocumentSigned })}>
             <div className="flex items-center gap-4">
               <div className={cn(
                 "w-10 h-10 rounded-xl flex items-center justify-center transition-colors",
@@ -175,7 +190,7 @@ export const OnboardingCard: React.FC<OnboardingCardProps> = ({ outlet, onUpdate
             </div>
           </div>
         </div>
-        <div className="flex-1 bg-stone-50/50 rounded-[2.5rem] p-8 border border-amber-50 relative overflow-hidden">
+        <div className="flex-1 bg-stone-50/50 rounded-[2rem] sm:rounded-[2.5rem] p-4 sm:p-8 border border-amber-50 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-8 opacity-[0.03] rotate-12"><CheckCircle2 size={120} /></div>
           <h4 className="text-[10px] font-black text-stone-900 uppercase tracking-[0.2em] mb-8 italic flex items-center gap-2 relative z-10"><div className="w-1.5 h-1.5 rounded-full bg-amber-600" />Verification</h4>
           <Verification checklist={outlet.onboardingChecklist || { detailsVerified: false, contactConfirmed: false, classApproved: false, routeAssigned: false, productListExplained: false, priceListExplained: false, cutoffTimeExplained: false, paymentRuleExplained: false, creditStatusConfirmed: false, deliveryTimeAgreed: false, returnPolicyExplained: false, complaintChannelShared: false, addedToActiveList: false }} onChange={(key, val) => {

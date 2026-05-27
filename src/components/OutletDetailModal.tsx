@@ -254,11 +254,11 @@ export const OutletDetailModal: React.FC<{ outlet: Outlet; onClose: () => void }
                     </div>
                     <div className="flex justify-between items-center group cursor-pointer">
                       <span className="text-[9px] font-black text-stone-400 uppercase tracking-widest">Latitude</span>
-                      <span className="text-xs font-black text-amber-600 italic group-hover:underline">{outlet.latitude || outlet.gps?.split(',')[0] || 'N/A'}</span>
+                      <span className="text-xs font-black text-amber-600 italic group-hover:underline">{outlet.latitude || outlet.gps?.split(',')[0] || 'Not Available'}</span>
                     </div>
                     <div className="flex justify-between items-center group cursor-pointer">
                       <span className="text-[9px] font-black text-stone-400 uppercase tracking-widest">Longitude</span>
-                      <span className="text-xs font-black text-amber-600 italic group-hover:underline">{outlet.longitude || outlet.gps?.split(',')[1] || 'N/A'}</span>
+                      <span className="text-xs font-black text-amber-600 italic group-hover:underline">{outlet.longitude || outlet.gps?.split(',')[1] || 'Not Available'}</span>
                     </div>
                   </div>
                 </div>

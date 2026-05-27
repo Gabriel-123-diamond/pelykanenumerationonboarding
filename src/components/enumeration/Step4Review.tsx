@@ -14,16 +14,16 @@ export const Step4Review: React.FC<Step4Props> = ({
 }) => {
   return (
     <div className="space-y-8 animate-in slide-in-from-right-8 duration-500">
-      <div className="bg-stone-950 text-white p-10 rounded-[3rem] shadow-2xl relative overflow-hidden border border-stone-800">
+      <div className="bg-stone-950 text-white p-6 sm:p-10 rounded-[2rem] sm:rounded-[3rem] shadow-2xl relative overflow-hidden border border-stone-800">
         <div className="absolute top-0 right-0 p-6 opacity-5 rotate-12">
           <CheckCircle2 size={160} />
         </div>
         <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-amber-600/10 rounded-full blur-3xl" />
         
-        <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.4em] mb-4">Algorithmic Assessment</p>
-        <h2 className="text-6xl font-black mb-10 tracking-tighter italic">Grade {recommendedClass}</h2>
+        <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] sm:tracking-[0.4em] mb-4">Algorithmic Assessment</p>
+        <h2 className="text-4xl sm:text-6xl font-black mb-8 sm:mb-10 tracking-tighter italic">Grade {recommendedClass}</h2>
         
-        <div className="grid grid-cols-2 gap-8 relative z-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 relative z-10">
           <div>
             <p className="text-[10px] font-black text-stone-500 uppercase tracking-widest mb-2">Aggregate Score</p>
             <p className="text-3xl font-black text-white italic">{total}</p>
@@ -56,8 +56,8 @@ export const Step4Review: React.FC<Step4Props> = ({
         </div>
       </div>
 
-      <section className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-stone-200/50 border border-amber-100/50">
-        <h3 className="text-[10px] font-black text-stone-400 uppercase tracking-[0.3em] mb-6">Final Attestation</h3>
+      <section className="bg-white p-5 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-xl shadow-stone-200/50 border border-amber-100/50">
+        <h3 className="text-[10px] font-black text-stone-400 uppercase tracking-[0.18em] sm:tracking-[0.3em] mb-6">Final Attestation</h3>
         <div className="space-y-6">
           <div className="p-6 bg-amber-50/50 rounded-2xl border border-amber-100 italic text-stone-700 text-xs font-bold leading-relaxed">
             "I hereby verify that all data points captured in this enumeration are accurate and reflect the true operational status of the outlet."

@@ -63,8 +63,8 @@ export const Step1Profile: React.FC<Step1Props> = ({
 
   return (
     <div className="space-y-8 animate-in slide-in-from-right-8 duration-500">
-      <section className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-stone-200/50 border border-amber-100/50">
-        <h2 className="text-xs font-black text-stone-400 uppercase tracking-[0.3em] mb-8 flex items-center gap-3">
+      <section className="bg-white p-5 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-xl shadow-stone-200/50 border border-amber-100/50">
+        <h2 className="text-xs font-black text-stone-400 uppercase tracking-[0.18em] sm:tracking-[0.3em] mb-8 flex items-center gap-3">
           <div className="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center">
             <MapPin size={16} className="text-amber-600" />
           </div>
@@ -78,10 +78,10 @@ export const Step1Profile: React.FC<Step1Props> = ({
               value={formData.name || ''}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="w-full bg-stone-50 border border-stone-100 rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all"
-              placeholder="e.g. Sunny Supermarket"
+              placeholder="For example, Sunny Supermarket"
             />
           </div>
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest ml-1">Owner Name</label>
               <input
@@ -101,7 +101,7 @@ export const Step1Profile: React.FC<Step1Props> = ({
               />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest ml-1">Outlet Type</label>
               <select
@@ -127,7 +127,7 @@ export const Step1Profile: React.FC<Step1Props> = ({
                 />
                 </div>
                 </div>
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <TimeSelect
                 label="Opening Time"
                 value={formData.openingTime || '08:00'}
@@ -139,7 +139,7 @@ export const Step1Profile: React.FC<Step1Props> = ({
                 onChange={(val) => setFormData({ ...formData, closingTime: val })}
                 />
                 </div>
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div className="space-y-2">
                 <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest ml-1">Phone Number</label>
                 <input
@@ -182,8 +182,8 @@ export const Step1Profile: React.FC<Step1Props> = ({
                 </div>
                 </div>
                 <div className="space-y-2">
-                  <div className="flex justify-between items-end mb-1">
-                    <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest ml-1">GPS Coordinates (Lat, Long)</label>
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-2 mb-1">
+                    <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest ml-1">Global Positioning System Coordinates (Latitude, Longitude)</label>
                     <a 
                       href="https://www.gps-coordinates.net/" 
                       target="_blank" 
@@ -207,7 +207,7 @@ export const Step1Profile: React.FC<Step1Props> = ({
                       });
                     }}
                     className="w-full bg-stone-50 border border-stone-100 rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500"
-                    placeholder="e.g. 6.465422, 3.406448"
+                    placeholder="For example, 6.465422, 3.406448"
                   />
                   <p className="text-[8px] font-medium text-stone-400 italic ml-1 mt-1 uppercase tracking-widest">Format: Latitude, Longitude (Separated by comma)</p>
                 </div>          <div className="space-y-2">
@@ -219,7 +219,7 @@ export const Step1Profile: React.FC<Step1Props> = ({
               className="w-full bg-stone-50 border border-stone-100 rounded-2xl px-5 py-4 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-amber-500"
             />
           </div>
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest ml-1">Town / Area</label>
               <input
@@ -242,14 +242,14 @@ export const Step1Profile: React.FC<Step1Props> = ({
         </div>
       </section>
       
-      <section className="bg-white p-8 rounded-[2.5rem] shadow-xl shadow-stone-200/50 border border-amber-100/50">
-        <h2 className="text-xs font-black text-stone-400 uppercase tracking-[0.3em] mb-8 flex items-center gap-3">
+      <section className="bg-white p-5 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-xl shadow-stone-200/50 border border-amber-100/50">
+        <h2 className="text-xs font-black text-stone-400 uppercase tracking-[0.18em] sm:tracking-[0.3em] mb-8 flex items-center gap-3">
           <div className="w-8 h-8 rounded-xl bg-amber-50 flex items-center justify-center">
             <Upload size={16} className="text-amber-600" />
           </div>
           Storefront Photos
         </h2>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
           {/* Existing Photos */}
           {formData.photoUrls?.map((url, i) => (
             <div key={`existing-${i}`} className="aspect-square bg-stone-50 rounded-2xl overflow-hidden relative group border border-stone-100 shadow-inner">
