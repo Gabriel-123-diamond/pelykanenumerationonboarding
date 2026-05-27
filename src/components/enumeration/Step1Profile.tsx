@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
-import { MapPin, Upload, Plus, X, Camera, Image, FileText } from 'lucide-react';
+import { MapPin, Upload, Plus, X, Camera, Image, FileText, Loader2 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import type { Outlet } from '../../types';
+import imageCompression from 'browser-image-compression';
 
 interface Step1Props {
   formData: Partial<Outlet>;
@@ -47,14 +48,43 @@ export const Step1Profile: React.FC<Step1Props> = ({
   formData, setFormData, photos, setPhotos, phoneError, setPhoneError, whatsappError, setWhatsappError
 }) => {
   const [showMenu, setShowMenu] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setPhotos([...photos, ...Array.from(e.target.files)]);
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setIsCompressing(true);
       setShowMenu(false);
+      
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
+      };
+
+      try {
+        const selectedFiles = Array.from(e.target.files);
+        const compressedFiles = await Promise.all(
+          selectedFiles.map(async (file) => {
+            // Only compress images, leave PDFs or other files as is
+            if (file.type.startsWith('image/')) {
+              return await imageCompression(file, options);
+            }
+            return file;
+          })
+        );
+
+        setPhotos([...photos, ...compressedFiles]);
+      } catch (error) {
+        console.error("Compression error:", error);
+        alert("Failed to process some images. Please try again.");
+      } finally {
+        setIsCompressing(false);
+        // Reset input value so same file can be picked again if removed
+        e.target.value = '';
+      }
     }
   };
 
@@ -290,11 +320,24 @@ export const Step1Profile: React.FC<Step1Props> = ({
           <div className="relative">
             <button 
               type="button"
+              disabled={isCompressing}
               onClick={() => setShowMenu(true)}
-              className="aspect-square w-full border-2 border-dashed border-stone-200 rounded-2xl flex flex-col items-center justify-center text-stone-400 hover:border-amber-400 hover:text-amber-600 hover:bg-amber-50 transition-all cursor-pointer group"
+              className={cn(
+                "aspect-square w-full border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all cursor-pointer group",
+                isCompressing ? "border-amber-400 bg-amber-50 text-amber-600" : "border-stone-200 text-stone-400 hover:border-amber-400 hover:text-amber-600 hover:bg-amber-50"
+              )}
             >
-              <Plus size={32} className="transition-transform group-hover:scale-110" />
-              <span className="text-[10px] font-black uppercase tracking-widest mt-2">Add Photo</span>
+              {isCompressing ? (
+                <>
+                  <Loader2 size={32} className="animate-spin" />
+                  <span className="text-[10px] font-black uppercase tracking-widest mt-2 text-center px-2">Optimizing...</span>
+                </>
+              ) : (
+                <>
+                  <Plus size={32} className="transition-transform group-hover:scale-110" />
+                  <span className="text-[10px] font-black uppercase tracking-widest mt-2">Add Photo</span>
+                </>
+              )}
             </button>
 
             {/* Hidden Inputs */}
