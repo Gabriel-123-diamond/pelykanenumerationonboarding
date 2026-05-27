@@ -17,6 +17,9 @@ export const AdminDashboard: React.FC = () => {
   const [selectedOutlet, setSelectedOutlet] = useState<Outlet | null>(null);
   const [loading, setLoading] = useState(true);
   const [outletFilter, setOutletFilter] = useState('');
+  const [agentFilter, setAgentFilter] = useState('all');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [staffFilter, setStaffFilter] = useState('');
   const [staffRoleFilter, setStaffRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -54,7 +57,32 @@ export const AdminDashboard: React.FC = () => {
 
   const pendingUsers = users.filter(u => !u.isApproved);
   const approvedUsers = users.filter(u => u.isApproved && u.role !== 'admin');
-  const filteredOutlets = outlets.filter(o => (o.name.toLowerCase().includes(outletFilter.toLowerCase()) || o.town.toLowerCase().includes(outletFilter.toLowerCase())) && (statusFilter === 'all' || o.status === statusFilter));
+  
+  const filteredOutlets = outlets.filter(o => {
+    const matchesSearch = o.name.toLowerCase().includes(outletFilter.toLowerCase()) || o.town.toLowerCase().includes(outletFilter.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || o.status === statusFilter;
+    const matchesAgent = agentFilter === 'all' || o.fieldOfficerName === agentFilter;
+    
+    let matchesDate = true;
+    if (startDate || endDate) {
+      const visitDate = new Date(o.dateVisited);
+      visitDate.setHours(0, 0, 0, 0);
+      
+      if (startDate) {
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+        if (visitDate < start) matchesDate = false;
+      }
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        if (visitDate > end) matchesDate = false;
+      }
+    }
+
+    return matchesSearch && matchesStatus && matchesAgent && matchesDate;
+  });
+
   const filteredStaff = approvedUsers.filter(u => 
     (u.name.toLowerCase().includes(staffFilter.toLowerCase()) || u.email.toLowerCase().includes(staffFilter.toLowerCase())) &&
     (staffRoleFilter === 'all' || u.role === staffRoleFilter)
@@ -68,6 +96,8 @@ export const AdminDashboard: React.FC = () => {
     enumerationStaff: approvedUsers.filter(u => u.role === 'enumeration').length,
     onboardingStaff: approvedUsers.filter(u => u.role === 'onboarding').length
   };
+
+  const uniqueAgents = Array.from(new Set(outlets.map(o => o.fieldOfficerName).filter(Boolean))).sort();
 
   if (loading) return (
     <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center gap-6">
@@ -122,6 +152,13 @@ export const AdminDashboard: React.FC = () => {
             setFilter={setOutletFilter}
             statusFilter={statusFilter}
             setStatusFilter={setStatusFilter}
+            agentFilter={agentFilter}
+            setAgentFilter={setAgentFilter}
+            startDate={startDate}
+            setStartDate={setStartDate}
+            endDate={endDate}
+            setEndDate={setEndDate}
+            agents={uniqueAgents}
             setSelectedOutlet={setSelectedOutlet}
             onExportCsv={() => exportOutletsCsv(filteredOutlets, 'outlet-export')}
             onExportWord={() => exportOutletsWord(filteredOutlets, 'outlet-export')}
