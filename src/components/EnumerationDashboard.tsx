@@ -71,6 +71,7 @@ export const EnumerationDashboard: React.FC = () => {
     setPhotos([]);
     setStep(1);
     setActiveTab('new');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const resetForm = () => {
@@ -79,6 +80,7 @@ export const EnumerationDashboard: React.FC = () => {
     setEvaluation(initialEvaluation);
     setFormData(initialFormData);
     setEditingOutletId(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const validatePhoneNumber = (num: string): boolean => {
@@ -247,6 +249,7 @@ export const EnumerationDashboard: React.FC = () => {
                     setActiveTab('history');
                   } else {
                     setStep(prev => Math.max(1, prev - 1));
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                   }
                 }} 
                 disabled={(step === 1 && !editingOutletId) || loading} 
@@ -264,6 +267,7 @@ export const EnumerationDashboard: React.FC = () => {
                     handleSubmit();
                   } else {
                     setStep(prev => Math.min(4, prev + 1));
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                   }
                 }} 
                 disabled={loading} 

@@ -1,5 +1,5 @@
-import React from 'react';
-import { MapPin, Upload, Plus, X } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { MapPin, Upload, Plus, X, Camera, Image, FileText } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import type { Outlet } from '../../types';
 
@@ -46,9 +46,15 @@ const TimeSelect = ({ label, value, onChange }: { label: string, value: string, 
 export const Step1Profile: React.FC<Step1Props> = ({
   formData, setFormData, photos, setPhotos, phoneError, setPhoneError, whatsappError, setWhatsappError
 }) => {
+  const [showMenu, setShowMenu] = useState(false);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setPhotos([...photos, ...Array.from(e.target.files)]);
+      setShowMenu(false);
     }
   };
 
@@ -280,11 +286,79 @@ export const Step1Profile: React.FC<Step1Props> = ({
               </div>
             </div>
           ))}
-          <label className="aspect-square border-2 border-dashed border-stone-200 rounded-2xl flex flex-col items-center justify-center text-stone-400 hover:border-amber-400 hover:text-amber-600 hover:bg-amber-50 transition-all cursor-pointer group">
-            <Plus size={32} className="transition-transform group-hover:scale-110" />
-            <span className="text-[10px] font-black uppercase tracking-widest mt-2">Add Photo</span>
-            <input type="file" multiple accept="image/*" className="hidden" onChange={handlePhotoChange} />
-          </label>
+          
+          <div className="relative">
+            <button 
+              type="button"
+              onClick={() => setShowMenu(true)}
+              className="aspect-square w-full border-2 border-dashed border-stone-200 rounded-2xl flex flex-col items-center justify-center text-stone-400 hover:border-amber-400 hover:text-amber-600 hover:bg-amber-50 transition-all cursor-pointer group"
+            >
+              <Plus size={32} className="transition-transform group-hover:scale-110" />
+              <span className="text-[10px] font-black uppercase tracking-widest mt-2">Add Photo</span>
+            </button>
+
+            {/* Hidden Inputs */}
+            <input type="file" accept="image/*" capture="environment" className="hidden" ref={cameraInputRef} onChange={handlePhotoChange} />
+            <input type="file" accept="image/*" multiple className="hidden" ref={galleryInputRef} onChange={handlePhotoChange} />
+            <input type="file" accept="image/*,application/pdf" className="hidden" ref={fileInputRef} onChange={handlePhotoChange} />
+
+            {/* Upload Menu Overlay */}
+            {showMenu && (
+              <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4">
+                <div className="absolute inset-0 bg-stone-950/60 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => setShowMenu(false)} />
+                <div className="bg-white w-full max-w-sm rounded-[2.5rem] p-8 shadow-2xl relative animate-in fade-in slide-in-from-bottom-10 duration-500">
+                  <div className="flex items-center justify-between mb-8">
+                    <div>
+                      <h3 className="text-sm font-black text-stone-900 uppercase tracking-tighter italic">Source Selection</h3>
+                      <p className="text-[9px] font-black text-amber-600 uppercase tracking-[0.2em] mt-1">Upload Storefront Evidence</p>
+                    </div>
+                    <button onClick={() => setShowMenu(false)} className="w-10 h-10 rounded-full bg-stone-50 flex items-center justify-center text-stone-400 hover:text-stone-950 hover:bg-stone-100 transition-all">
+                      <X size={20} />
+                    </button>
+                  </div>
+                  
+                  <div className="grid grid-cols-3 gap-4">
+                    <button 
+                      onClick={() => cameraInputRef.current?.click()}
+                      className="flex flex-col items-center gap-4 p-5 rounded-3xl bg-stone-50 hover:bg-amber-50 hover:text-amber-600 transition-all group"
+                    >
+                      <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-stone-400 group-hover:text-amber-600 group-hover:scale-110 transition-all">
+                        <Camera size={28} />
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-widest">Camera</span>
+                    </button>
+                    
+                    <button 
+                      onClick={() => galleryInputRef.current?.click()}
+                      className="flex flex-col items-center gap-4 p-5 rounded-3xl bg-stone-50 hover:bg-amber-50 hover:text-amber-600 transition-all group"
+                    >
+                      <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-stone-400 group-hover:text-amber-600 group-hover:scale-110 transition-all">
+                        <Image size={28} />
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-widest">Photos</span>
+                    </button>
+                    
+                    <button 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex flex-col items-center gap-4 p-5 rounded-3xl bg-stone-50 hover:bg-amber-50 hover:text-amber-600 transition-all group"
+                    >
+                      <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-stone-400 group-hover:text-amber-600 group-hover:scale-110 transition-all">
+                        <FileText size={28} />
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-widest">Files</span>
+                    </button>
+                  </div>
+
+                  <button 
+                    onClick={() => setShowMenu(false)}
+                    className="w-full mt-8 py-4 rounded-2xl bg-stone-950 text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-amber-600 transition-all shadow-xl"
+                  >
+                    Cancel Selection
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </section>
     </div>

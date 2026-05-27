@@ -9,12 +9,11 @@ interface Step2Props {
 }
 
 const PRODUCTS = [
-  'Creamy Delight (Jumbo)',
-  'Creamy Delight (Family Loaf)',
   'Round Bread',
-  'Big Butter Fresh',
-  'Small Butter Fresh',
-  'Milky Bite'
+  'Small Loaf',
+  'Family Loaf',
+  'Jumbo Loaf',
+  'Short Loaf'
 ];
 
 export const Step2Intelligence: React.FC<Step2Props> = ({ formData, setFormData }) => {
@@ -96,7 +95,6 @@ export const Step2Intelligence: React.FC<Step2Props> = ({ formData, setFormData 
               >
                 <option value="">Select Size</option>
                 {PRODUCTS.map(p => <option key={p} value={p}>{p}</option>)}
-                <option>Other</option>
               </select>
             </div>
           </div>
@@ -209,7 +207,7 @@ export const Step2Intelligence: React.FC<Step2Props> = ({ formData, setFormData 
         </h2>
         <div className="space-y-8">
           <div className="space-y-4">
-            <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest ml-1 italic">Preferred Product Selection</label>
+            <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest ml-1 italic">Preferred Product Selection (Click all that applies)</label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {PRODUCTS.map(product => (
                 <button
@@ -272,7 +270,7 @@ export const Step2Intelligence: React.FC<Step2Props> = ({ formData, setFormData 
             <div className="space-y-4">
               <label className="text-[10px] font-black text-stone-500 uppercase tracking-widest ml-1">Payment Method (Multi-select)</label>
               <div className="grid grid-cols-3 gap-2">
-                {['Transfer', 'Cash', 'Point of Sale'].map(method => (
+                {['Transfer', 'Cash', 'POS'].map(method => (
                   <button
                     key={method}
                     onClick={() => togglePaymentMethod(method)}
