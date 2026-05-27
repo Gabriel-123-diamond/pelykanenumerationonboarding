@@ -1,5 +1,5 @@
-import React from 'react';
-import { Download, FileText, Store } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Download, FileText, Store, Search, ChevronDown, Check } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import type { Outlet } from '../../types';
 
@@ -23,73 +23,140 @@ interface DistributionTabProps {
 
 export const DistributionTab: React.FC<DistributionTabProps> = ({
   outlets, filter, setFilter, statusFilter, setStatusFilter, agentFilter, setAgentFilter, startDate, setStartDate, endDate, setEndDate, agents, setSelectedOutlet, onExportCsv, onExportWord
-}) => (
-  <div className="bg-white rounded-[2rem] sm:rounded-[3rem] shadow-xl shadow-stone-200/50 border border-amber-100 overflow-hidden animate-in fade-in duration-700">
-    <div className="p-5 sm:p-10 border-b border-amber-50 bg-stone-50/30 space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <h2 className="text-xl font-black text-stone-950 uppercase tracking-tighter italic">Distribution Pipeline</h2>
-          <p className="text-stone-400 text-xs font-bold uppercase tracking-widest mt-1">Real-time market synchronization</p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <button onClick={onExportCsv} className="bg-stone-900 text-white text-[10px] font-black px-4 py-2 rounded-xl uppercase flex items-center gap-2 shadow-lg border border-stone-800 hover:bg-amber-600 transition-colors leading-tight">
-            <Download size={14} /> Excel or Google Sheets
-          </button>
-          <button onClick={onExportWord} className="bg-white text-stone-700 text-[10px] font-black px-4 py-2 rounded-xl uppercase flex items-center gap-2 shadow-sm border border-amber-100 hover:border-amber-300 transition-colors leading-tight">
-            <FileText size={14} /> Word or Google Docs
-          </button>
-        </div>
-      </div>
+}) => {
+  const [isAgentMenuOpen, setIsAgentMenuOpen] = useState(false);
+  const [agentSearchQuery, setAgentSearchQuery] = useState('');
+  const agentMenuRef = useRef<HTMLDivElement>(null);
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
-        <div className="space-y-1.5">
-          <label className="text-[8px] font-black text-stone-400 uppercase tracking-widest ml-1">Search Outlets</label>
-          <input 
-            type="text" placeholder="Name or Town..." value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="bg-white border border-amber-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest focus:ring-2 focus:ring-amber-500 outline-none w-full shadow-sm"
-          />
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (agentMenuRef.current && !agentMenuRef.current.contains(event.target as Node)) {
+        setIsAgentMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const filteredAgentsList = agents.filter(agent => 
+    agent.toLowerCase().includes(agentSearchQuery.toLowerCase())
+  );
+
+  return (
+    <div className="bg-white rounded-[2rem] sm:rounded-[3rem] shadow-xl shadow-stone-200/50 border border-amber-100 overflow-hidden animate-in fade-in duration-700">
+      <div className="p-5 sm:p-10 border-b border-amber-50 bg-stone-50/30 space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <h2 className="text-xl font-black text-stone-950 uppercase tracking-tighter italic">Distribution Pipeline</h2>
+            <p className="text-stone-400 text-xs font-bold uppercase tracking-widest mt-1">Real-time market synchronization</p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <button onClick={onExportCsv} className="bg-stone-900 text-white text-[10px] font-black px-4 py-2 rounded-xl uppercase flex items-center gap-2 shadow-lg border border-stone-800 hover:bg-amber-600 transition-colors leading-tight">
+              <Download size={14} /> Excel or Google Sheets
+            </button>
+            <button onClick={onExportWord} className="bg-white text-stone-700 text-[10px] font-black px-4 py-2 rounded-xl uppercase flex items-center gap-2 shadow-sm border border-amber-100 hover:border-amber-300 transition-colors leading-tight">
+              <FileText size={14} /> Word or Google Docs
+            </button>
+          </div>
         </div>
-        <div className="space-y-1.5">
-          <label className="text-[8px] font-black text-stone-400 uppercase tracking-widest ml-1">Status</label>
-          <select 
-            value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-white border border-amber-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest outline-none shadow-sm w-full"
-          >
-            <option value="all">All Status</option>
-            <option value="enumerated">Enumerated</option>
-            <option value="pending_onboarding">Pending Onboarding</option>
-            <option value="active_customer">Active Customer</option>
-          </select>
-        </div>
-        <div className="space-y-1.5">
-          <label className="text-[8px] font-black text-stone-400 uppercase tracking-widest ml-1">Field Agent</label>
-          <select 
-            value={agentFilter} onChange={(e) => setAgentFilter(e.target.value)}
-            className="bg-white border border-amber-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest outline-none shadow-sm w-full"
-          >
-            <option value="all">All Agents</option>
-            {agents.map(agent => <option key={agent} value={agent}>{agent}</option>)}
-          </select>
-        </div>
-        <div className="space-y-1.5">
-          <label className="text-[8px] font-black text-stone-400 uppercase tracking-widest ml-1">Start Date</label>
-          <input 
-            type="date" value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="bg-white border border-amber-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest focus:ring-2 focus:ring-amber-500 outline-none w-full shadow-sm"
-          />
-        </div>
-        <div className="space-y-1.5">
-          <label className="text-[8px] font-black text-stone-400 uppercase tracking-widest ml-1">End Date</label>
-          <input 
-            type="date" value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            className="bg-white border border-amber-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest focus:ring-2 focus:ring-amber-500 outline-none w-full shadow-sm"
-          />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-[8px] font-black text-stone-400 uppercase tracking-widest ml-1">Search Outlets</label>
+            <input 
+              type="text" placeholder="Name or Town..." value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="bg-white border border-amber-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest focus:ring-2 focus:ring-amber-500 outline-none w-full shadow-sm"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[8px] font-black text-stone-400 uppercase tracking-widest ml-1">Status</label>
+            <select 
+              value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+              className="bg-white border border-amber-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest outline-none shadow-sm w-full"
+            >
+              <option value="all">All Status</option>
+              <option value="enumerated">Enumerated</option>
+              <option value="pending_onboarding">Pending Onboarding</option>
+              <option value="active_customer">Active Customer</option>
+            </select>
+          </div>
+          <div className="space-y-1.5 relative" ref={agentMenuRef}>
+            <label className="text-[8px] font-black text-stone-400 uppercase tracking-widest ml-1">Field Agent</label>
+            <button
+              onClick={() => setIsAgentMenuOpen(!isAgentMenuOpen)}
+              className="bg-white border border-amber-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest outline-none shadow-sm w-full flex items-center justify-between text-left h-[38px]"
+            >
+              <span className="truncate">{agentFilter === 'all' ? 'All Agents' : agentFilter}</span>
+              <ChevronDown size={14} className={cn("transition-transform", isAgentMenuOpen && "rotate-180")} />
+            </button>
+
+            {isAgentMenuOpen && (
+              <div className="absolute top-full left-0 w-full mt-2 bg-white border border-amber-100 rounded-2xl shadow-2xl z-[100] animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden">
+                <div className="p-3 border-b border-stone-50">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" size={12} />
+                    <input 
+                      type="text"
+                      placeholder="Search Agent..."
+                      value={agentSearchQuery}
+                      onChange={(e) => setAgentSearchQuery(e.target.value)}
+                      autoFocus
+                      className="w-full bg-stone-50 border border-stone-100 rounded-xl pl-9 pr-4 py-2 text-[10px] font-black uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    />
+                  </div>
+                </div>
+                <div className="max-h-60 overflow-y-auto p-2 scrollbar-thin scrollbar-thumb-amber-200">
+                  <button
+                    onClick={() => { setAgentFilter('all'); setIsAgentMenuOpen(false); setAgentSearchQuery(''); }}
+                    className={cn(
+                      "w-full text-left px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center justify-between group transition-colors",
+                      agentFilter === 'all' ? "bg-amber-600 text-white" : "hover:bg-amber-50 text-stone-600"
+                    )}
+                  >
+                    All Agents
+                    {agentFilter === 'all' && <Check size={12} />}
+                  </button>
+                  {filteredAgentsList.map(agent => (
+                    <button
+                      key={agent}
+                      onClick={() => { setAgentFilter(agent); setIsAgentMenuOpen(false); setAgentSearchQuery(''); }}
+                      className={cn(
+                        "w-full text-left px-4 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest flex items-center justify-between group transition-colors",
+                        agentFilter === agent ? "bg-amber-600 text-white" : "hover:bg-amber-50 text-stone-600"
+                      )}
+                    >
+                      <span className="truncate">{agent}</span>
+                      {agentFilter === agent && <Check size={12} />}
+                    </button>
+                  ))}
+                  {filteredAgentsList.length === 0 && (
+                    <div className="p-4 text-center">
+                      <p className="text-[8px] font-black text-stone-400 uppercase tracking-widest">No agents found</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[8px] font-black text-stone-400 uppercase tracking-widest ml-1">Start Date</label>
+            <input 
+              type="date" value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="bg-white border border-amber-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest focus:ring-2 focus:ring-amber-500 outline-none w-full shadow-sm"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[8px] font-black text-stone-400 uppercase tracking-widest ml-1">End Date</label>
+            <input 
+              type="date" value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="bg-white border border-amber-100 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest focus:ring-2 focus:ring-amber-500 outline-none w-full shadow-sm"
+            />
+          </div>
         </div>
       </div>
-    </div>
     <div className="overflow-x-auto">
       <table className="w-full text-left border-collapse">
         <thead>
